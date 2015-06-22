@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+   <color name="translucent_black">#10000000</color>
+   <color name="translucent_black_2">#20000000</color>
+   <color name="translucent_black_3">#30000000</color>
+   <color name="translucent">#00000000</color>
+   <color name="blue">#99D9EA</color>
+   <color name="yellow_pale">#ffda99</color>
+   <color name="red_pale">#ffa799</color>
+   <color name="green_pale">#E3FFD3</color>
+   <color name="green">#93ee22</color>
+   <color name="yellow">#ffd566</color>
+   <color name="red">#ff7656</color>
+   
+   <!-- labels -->
+   <color name="label_green_1">#00755E</color>
+   <color name="label_green_2">#03C03C</color>
+   <color name="label_red_1">#E30B5D</color>
+   <color name="label_red_2">#E34234</color>
+   <color name="label_yellow_1">#FF7F00</color>
+   <color name="label_yellow_2">#FFDF00</color>
+   <color name="label_blue_1">#1560BD</color>
+   <color name="label_blue_2">#30D5C8</color>
+   <color name="label_purple_1">#69359C</color>
+   <color name="label_purple_2">#BD33A4</color>
+</resources>

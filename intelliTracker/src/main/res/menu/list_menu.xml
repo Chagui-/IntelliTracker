@@ -1,0 +1,18 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    
+    <item
+        android:id="@+id/action_new_track"
+        android:orderInCategory="100"
+        android:showAsAction="always"
+        android:icon="@drawable/action_add"
+        android:title="@string/action_add"/>
+    
+    <item
+        android:id="@+id/action_batch_track"
+        android:orderInCategory="100"
+        android:showAsAction="always"
+        android:icon="@drawable/action_add_batch"
+        android:title="@string/action_add_batch"/>
+
+</menu>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">IntelliTracker</string>
+    <string name="title_item_detail">Details</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_add">Add Track</string>
+    <string name="action_add_batch">Add From File</string>
+    <string name="action_update">Update</string>
+    <string name="drawer_open">Drawer Open</string>
+    <string name="drawer_close">Drawe Close</string>
+
+</resources>

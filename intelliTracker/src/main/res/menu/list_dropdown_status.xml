@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/none"
+        android:title="Auto"/>
+    <item
+        android:id="@+id/delivered"
+        android:title="Delivered"/>
+    <item
+        android:id="@+id/lost"
+        android:title="Lost"/>
+    <item
+        android:id="@+id/claimed"
+        android:title="Claimed"/>
+    <item
+        android:id="@+id/customs"
+        android:title="In Customs"/>
+    <item
+        android:id="@+id/transit"
+        android:title="In Transit"/>
+    <item
+        android:id="@+id/pickup"
+        android:title="Awaiting Pickup"/>
+
+</menu>
