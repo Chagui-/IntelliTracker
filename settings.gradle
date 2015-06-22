@@ -1,0 +1,2 @@
+include ':fileExplorer'
+include ':intelliTracker'
