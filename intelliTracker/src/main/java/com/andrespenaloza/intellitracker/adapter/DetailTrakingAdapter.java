@@ -1,7 +1,5 @@
 package com.andrespenaloza.intellitracker.adapter;
 
-import java.util.ArrayList;
-
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,8 +8,10 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.andrespenaloza.intellitracker.R;
-import com.andrespenaloza.intellitracker.objects.ItemManager.TrackingItem;
-import com.andrespenaloza.intellitracker.objects.ItemManager.TrackingItem.StatusPair;
+import com.andrespenaloza.intellitracker.objects.TrackingItem;
+import com.andrespenaloza.intellitracker.objects.TrackingItem.StatusPair;
+
+import java.util.ArrayList;
 
 public class DetailTrakingAdapter extends BaseAdapter {
 	static class ViewHolder {

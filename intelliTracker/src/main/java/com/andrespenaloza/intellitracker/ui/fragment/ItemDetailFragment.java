@@ -16,7 +16,7 @@ import com.andrespenaloza.intellitracker.adapter.DetailTrakingAdapter;
 import com.andrespenaloza.intellitracker.connection.TrackingManager;
 import com.andrespenaloza.intellitracker.connection.TrackingManager.TrackingListener;
 import com.andrespenaloza.intellitracker.objects.ItemManager;
-import com.andrespenaloza.intellitracker.objects.ItemManager.TrackingItem;
+import com.andrespenaloza.intellitracker.objects.TrackingItem;
 
 public class ItemDetailFragment extends Fragment implements TrackingListener {
 	public static final String ARG_ITEM_ID = "item_id";

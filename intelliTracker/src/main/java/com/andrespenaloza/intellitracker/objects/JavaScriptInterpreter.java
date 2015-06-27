@@ -1,14 +1,14 @@
 package com.andrespenaloza.intellitracker.objects;
 
+import android.util.Log;
+
+import org.mozilla.javascript.Context;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-
-import org.mozilla.javascript.Context;
-
-import android.util.Log;
 
 public class JavaScriptInterpreter {
 	

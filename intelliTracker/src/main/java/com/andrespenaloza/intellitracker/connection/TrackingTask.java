@@ -1,13 +1,12 @@
 package com.andrespenaloza.intellitracker.connection;
 
-import java.io.IOException;
-import java.lang.ref.WeakReference;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.Locale;
+import android.text.TextUtils;
+
+import com.andrespenaloza.intellitracker.MyApplication;
+import com.andrespenaloza.intellitracker.objects.ItemManager;
+import com.andrespenaloza.intellitracker.objects.TrackingItem;
+import com.andrespenaloza.intellitracker.objects.TrackingItem.StatusPair;
+import com.andrespenaloza.intellitracker.objects.JavaScriptInterpreter;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NoHttpResponseException;
@@ -18,7 +17,6 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
-import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -27,13 +25,13 @@ import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Scriptable;
 
-import android.text.TextUtils;
-
-import com.andrespenaloza.intellitracker.MyApplication;
-import com.andrespenaloza.intellitracker.objects.ItemManager;
-import com.andrespenaloza.intellitracker.objects.ItemManager.TrackingItem;
-import com.andrespenaloza.intellitracker.objects.ItemManager.TrackingItem.StatusPair;
-import com.andrespenaloza.intellitracker.objects.JavaScriptInterpreter;
+import java.io.IOException;
+import java.lang.ref.WeakReference;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 
 public class TrackingTask implements Runnable {
 
@@ -115,7 +113,7 @@ public class TrackingTask implements Runnable {
 
 		// parse tracking number (compatibility with last versions)
 		if (item.getTrackingNumber().matches(TrackingItem.COURIER_GLOBAL_POSTAL_CODE))
-			item.setCourier(ItemManager.TrackingItem.COURIER_GLOBAL_POSTAL);
+			item.setCourier(TrackingItem.COURIER_GLOBAL_POSTAL);
 
 		// Instantiates the weak reference to the incoming view
 		mItemWeakReference = new WeakReference<TrackingItem>(item);
@@ -176,7 +174,7 @@ public class TrackingTask implements Runnable {
 	}
 
 	private void connect() throws NullPointerException {
-		if (mItemWeakReference.get().getCourier() == ItemManager.TrackingItem.COURIER_UNKNOWN) {
+		if (mItemWeakReference.get().getCourier() == TrackingItem.COURIER_UNKNOWN) {
 			// get courier, get hash
 			handleState(TrackingManager.SEARCHING_COURIER);
 			findCourier();
@@ -302,7 +300,7 @@ public class TrackingTask implements Runnable {
 				return;
 			}
 		}
-		downloadFailed(ItemManager.TrackingItem.STATUS_ERROR_TRACKING_NUMBER);
+		downloadFailed(TrackingItem.STATUS_ERROR_TRACKING_NUMBER);
 	}
 
 	private boolean connectCourier(int courier, String hash) throws NullPointerException {
@@ -340,13 +338,13 @@ public class TrackingTask implements Runnable {
 			e.printStackTrace();
 			mResponse = null;
 			if (e instanceof ConnectTimeoutException) {
-				downloadFailed(ItemManager.TrackingItem.STATUS_ERROR_CONNECTION_TIMEOUT);
+				downloadFailed(TrackingItem.STATUS_ERROR_CONNECTION_TIMEOUT);
 			} else if (e instanceof NoHttpResponseException) {
-				downloadFailed(ItemManager.TrackingItem.STATUS_ERROR_NO_HTTP_RESPONSE);
+				downloadFailed(TrackingItem.STATUS_ERROR_NO_HTTP_RESPONSE);
 			} else if (e instanceof IOException) {
-				downloadFailed(ItemManager.TrackingItem.STATUS_ERROR_INTERNET);
+				downloadFailed(TrackingItem.STATUS_ERROR_INTERNET);
 			} else {
-				downloadFailed(ItemManager.TrackingItem.STATUS_ERROR_INTERNET);
+				downloadFailed(TrackingItem.STATUS_ERROR_INTERNET);
 			}
 			return false;
 		}
@@ -360,34 +358,34 @@ public class TrackingTask implements Runnable {
 				// Ok
 				break;
 			case -1:
-				downloadFailed(ItemManager.TrackingItem.STATUS_ERROR_ILLEGAL_1);
+				downloadFailed(TrackingItem.STATUS_ERROR_ILLEGAL_1);
 				return false;
 			case -2:
-				downloadFailed(ItemManager.TrackingItem.STATUS_ERROR_ILLEGAL_2);
+				downloadFailed(TrackingItem.STATUS_ERROR_ILLEGAL_2);
 				return false;
 			case -3:
-				downloadFailed(ItemManager.TrackingItem.STATUS_ERROR_SYSTEM_UPDATING);
+				downloadFailed(TrackingItem.STATUS_ERROR_SYSTEM_UPDATING);
 				return false;
 			case -4:
-				downloadFailed(ItemManager.TrackingItem.STATUS_ERROR_ILLEGAL_4);
+				downloadFailed(TrackingItem.STATUS_ERROR_ILLEGAL_4);
 				return false;
 			case -5:
-				downloadFailed(ItemManager.TrackingItem.STATUS_ERROR_TRACKING_TOO_OFTEN);
+				downloadFailed(TrackingItem.STATUS_ERROR_TRACKING_TOO_OFTEN);
 				return false;
 			case -6:
-				downloadFailed(ItemManager.TrackingItem.STATUS_ERROR_WEBSITE);
+				downloadFailed(TrackingItem.STATUS_ERROR_WEBSITE);
 				return false;
 			case -7:
-				downloadFailed(ItemManager.TrackingItem.STATUS_ERROR_TRACKING_NUMBER);
+				downloadFailed(TrackingItem.STATUS_ERROR_TRACKING_NUMBER);
 				return false;
 			case -8:
-				downloadFailed(ItemManager.TrackingItem.STATUS_ERROR_CAPTCHA);
+				downloadFailed(TrackingItem.STATUS_ERROR_CAPTCHA);
 				return false;
 			case -9:
-				downloadFailed(ItemManager.TrackingItem.STATUS_ERROR_WEB_PROXY);
+				downloadFailed(TrackingItem.STATUS_ERROR_WEB_PROXY);
 				return false;
 			default:
-				downloadFailed(ItemManager.TrackingItem.STATUS_ERROR_UNKNOWN);
+				downloadFailed(TrackingItem.STATUS_ERROR_UNKNOWN);
 				return false;
 			}
 
@@ -398,9 +396,9 @@ public class TrackingTask implements Runnable {
 			if (e == 0) {
 				// "Not Found"
 				mResponse = null;
-				if (mItemWeakReference.get().getCourier() != ItemManager.TrackingItem.COURIER_UNKNOWN) {
+				if (mItemWeakReference.get().getCourier() != TrackingItem.COURIER_UNKNOWN) {
 					// has courier
-					mLastErrorStatus = ItemManager.TrackingItem.STATUS_ERROR_TRACKING_NUMBER;
+					mLastErrorStatus = TrackingItem.STATUS_ERROR_TRACKING_NUMBER;
 				}
 				return false;
 			}

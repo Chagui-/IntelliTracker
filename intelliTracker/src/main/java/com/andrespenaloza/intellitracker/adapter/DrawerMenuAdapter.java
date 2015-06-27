@@ -1,7 +1,5 @@
 package com.andrespenaloza.intellitracker.adapter;
 
-import java.util.ArrayList;
-
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -16,7 +14,9 @@ import android.widget.TextView;
 import com.andrespenaloza.intellitracker.R;
 import com.andrespenaloza.intellitracker.factory.LabelFactory.LabelColor;
 import com.andrespenaloza.intellitracker.objects.ItemManager;
-import com.andrespenaloza.intellitracker.objects.ItemManager.Label;
+import com.andrespenaloza.intellitracker.objects.Label;
+
+import java.util.ArrayList;
 
 public class DrawerMenuAdapter extends BaseAdapter {
 

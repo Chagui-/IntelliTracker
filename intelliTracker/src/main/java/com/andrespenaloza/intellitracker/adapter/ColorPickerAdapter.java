@@ -1,7 +1,5 @@
 package com.andrespenaloza.intellitracker.adapter;
 
-import java.util.ArrayList;
-
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +9,8 @@ import android.widget.TextView;
 
 import com.andrespenaloza.intellitracker.R;
 import com.andrespenaloza.intellitracker.factory.LabelFactory.LabelColor;
+
+import java.util.ArrayList;
 
 public class ColorPickerAdapter extends BaseAdapter {
 	static class ViewHolder {

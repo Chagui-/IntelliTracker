@@ -1,34 +1,20 @@
 package com.andrespenaloza.intellitracker.connection;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Queue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.Function;
-import org.mozilla.javascript.Scriptable;
-
 import android.annotation.SuppressLint;
-import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.widget.Toast;
 
-import com.andrespenaloza.intellitracker.MyApplication;
 import com.andrespenaloza.intellitracker.objects.ItemManager;
-import com.andrespenaloza.intellitracker.objects.ItemManager.TrackingItem;
-import com.andrespenaloza.intellitracker.objects.ItemManager.TrackingItem.StatusPair;
-import com.andrespenaloza.intellitracker.objects.JavaScriptInterpreter;
+import com.andrespenaloza.intellitracker.objects.TrackingItem;
+
+import java.util.ArrayList;
+import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class TrackingManager {
 	public interface TrackingListener {
@@ -169,8 +155,8 @@ public class TrackingManager {
 	}
 
 	static public TrackingTask startDownload(TrackingItem item) {
-		if (item.isManualMode() || item.getPackageStatus() == ItemManager.TrackingItem.STATUS_UPDATING ||
-				item.getPackageStatus() == ItemManager.TrackingItem.STATUS_SEARCHING_COURIER)
+		if (item.isManualMode() || item.getPackageStatus() == TrackingItem.STATUS_UPDATING ||
+				item.getPackageStatus() == TrackingItem.STATUS_SEARCHING_COURIER)
 			return null;
 		/*
 		 * Gets a task from the pool of tasks, returning null if the pool is

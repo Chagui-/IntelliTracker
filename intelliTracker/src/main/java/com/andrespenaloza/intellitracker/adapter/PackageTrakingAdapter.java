@@ -1,7 +1,5 @@
 package com.andrespenaloza.intellitracker.adapter;
 
-import java.util.ArrayList;
-
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -18,8 +16,10 @@ import com.andrespenaloza.intellitracker.R;
 import com.andrespenaloza.intellitracker.factory.LabelFactory;
 import com.andrespenaloza.intellitracker.factory.LabelFactory.LabelView;
 import com.andrespenaloza.intellitracker.objects.ItemManager;
-import com.andrespenaloza.intellitracker.objects.ItemManager.Label;
-import com.andrespenaloza.intellitracker.objects.ItemManager.TrackingItem;
+import com.andrespenaloza.intellitracker.objects.Label;
+import com.andrespenaloza.intellitracker.objects.TrackingItem;
+
+import java.util.ArrayList;
 
 public class PackageTrakingAdapter extends BaseAdapter {
 	static class ViewHolder {

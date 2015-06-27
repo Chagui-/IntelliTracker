@@ -22,7 +22,7 @@ import com.andrespenaloza.intellitracker.connection.TrackingManager;
 import com.andrespenaloza.intellitracker.connection.TrackingManager.TrackingListener;
 import com.andrespenaloza.intellitracker.factory.DialogFactory.EditItemDialog;
 import com.andrespenaloza.intellitracker.objects.ItemManager;
-import com.andrespenaloza.intellitracker.objects.ItemManager.TrackingItem;
+import com.andrespenaloza.intellitracker.objects.TrackingItem;
 
 public class ItemListFragment extends Fragment implements TrackingListener, onCustomItemClickListener, onMoreItemClickListener {
 

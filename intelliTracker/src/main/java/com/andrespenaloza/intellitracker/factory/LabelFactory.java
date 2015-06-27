@@ -1,7 +1,5 @@
 package com.andrespenaloza.intellitracker.factory;
 
-import java.util.ArrayList;
-
 import android.content.Context;
 import android.graphics.drawable.GradientDrawable;
 import android.view.View;
@@ -10,7 +8,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.andrespenaloza.intellitracker.R;
-import com.andrespenaloza.intellitracker.objects.ItemManager.Label;
+import com.andrespenaloza.intellitracker.objects.Label;
+
+import java.util.ArrayList;
 
 public class LabelFactory {
 	public static interface OnLabelButtonClickListener {

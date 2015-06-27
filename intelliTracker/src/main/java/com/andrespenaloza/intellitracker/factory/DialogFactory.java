@@ -1,7 +1,5 @@
 package com.andrespenaloza.intellitracker.factory;
 
-import java.util.ArrayList;
-
 import android.app.Dialog;
 import android.content.Context;
 import android.view.Menu;
@@ -22,9 +20,11 @@ import com.andrespenaloza.intellitracker.R;
 import com.andrespenaloza.intellitracker.adapter.ColorPickerAdapter;
 import com.andrespenaloza.intellitracker.factory.LabelFactory.LabelColor;
 import com.andrespenaloza.intellitracker.objects.ItemManager;
-import com.andrespenaloza.intellitracker.objects.ItemManager.Label;
-import com.andrespenaloza.intellitracker.objects.ItemManager.TrackingItem;
+import com.andrespenaloza.intellitracker.objects.Label;
+import com.andrespenaloza.intellitracker.objects.TrackingItem;
 import com.andrespenaloza.intellitracker.ui.ItemListActivity;
+
+import java.util.ArrayList;
 
 public class DialogFactory {
 

@@ -1,9 +1,5 @@
 package com.andrespenaloza.intellitracker.ui;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -27,12 +23,16 @@ import com.andrespenaloza.intellitracker.factory.DialogFactory.EditItemDialog;
 import com.andrespenaloza.intellitracker.factory.DialogFactory.EditLabelDialog;
 import com.andrespenaloza.intellitracker.factory.DialogFactory.LabelColorHolder;
 import com.andrespenaloza.intellitracker.objects.ItemManager;
-import com.andrespenaloza.intellitracker.objects.ItemManager.Label;
-import com.andrespenaloza.intellitracker.objects.ItemManager.TrackingItem;
+import com.andrespenaloza.intellitracker.objects.Label;
+import com.andrespenaloza.intellitracker.objects.TrackingItem;
 import com.andrespenaloza.intellitracker.ui.fragment.ItemDetailFragment;
 import com.andrespenaloza.intellitracker.ui.fragment.ItemListFragment;
 import com.lamerman.FileDialog;
 import com.lamerman.SelectionMode;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 
 /**
  * An activity representing a list of Items. This activity has different
