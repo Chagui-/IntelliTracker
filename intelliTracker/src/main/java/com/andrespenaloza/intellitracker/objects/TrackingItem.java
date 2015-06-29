@@ -1,6 +1,7 @@
 package com.andrespenaloza.intellitracker.objects;
 
 import android.annotation.SuppressLint;
+import android.text.TextUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -102,39 +103,50 @@ public class TrackingItem {
         public String mTime;
         public String mStatus;
 
+        public StatusPair(){
+            mTime = "";
+            mStatus = "";
+        }
+
+        public StatusPair(String timeStatusPair){
+            String[] split = TextUtils.split(timeStatusPair," -- ");
+            mTime = split[0];
+            mStatus = split[1];
+        }
+
         public String toString(){
-            return mTime + ", " + mStatus;
+            return mTime + " -- " + mStatus;
         }
     }
 
-    int mCourier;
-    String mName;
-    String mHash;
-    String mTrackingNumber;
-    ArrayList<StatusPair> mStatusList;
-    String mStatus; //mStatusServer
-    String mStatusOld; //mStatus
-    int mPackageStatus;
-    int mPackageStatusOld;
-    Date mLastUpdated;
-    Date mLastQuery;
-    Date mLastStatusChanged;
     Date mLastStatusChangedOverride;
-    Date mFirstTimeUpdated;
+    private int mPackageStatusOverride;
+
+    //new model
+    private int id;
+    private String mName;
+    private String mTrackingNumber;
+    private Date mDateCreated;
+    private Date mLastQuery;
+    private ArrayList<StatusPair> mStatusList;
+    private int mPackageStatus;
+    private int mPackageStatusManual;
+    private String mOriginCountry;
+    private String mDestinationCountry;
+    private int mCourier;
+
+    ArrayList<Integer> mLabelIDS;
+    String mStatusServer; //mStatusServer
     int mCurrentStatusFlag;
-    int mPackageStatusOverride;
-    ArrayList<Long> mLabelIDS;
-    boolean isArchived;
-    private long id;
+    ////end new model
 
     public int getCourier() {
         return mCourier;
     }
 
     public String getStatusServer() {
-        return mStatus;
+        return mStatusServer;
     }
-
 
     public int getCourierType() {
         return mCourier - 1;
@@ -151,41 +163,65 @@ public class TrackingItem {
     }
 
     public boolean archive() {
-        if (isArchived)
+        if (isArchived())
             return false;
         ItemManager.archive(this);
-        isArchived = true;
         return true;
     }
 
-    public boolean isArchive() {
-        return isArchived;
+    public boolean isArchived() {
+        return getLabel(ItemManager.LABEL_CATEGORY_UNFINISHED) == null;
     }
 
     public void unarchive() {
         ItemManager.unarchive(this);
-        isArchived = false;
     }
 
-    public TrackingItem(String name, String trackingNumber) {
-        isArchived = false;
+    public static ArrayList<StatusPair> stringToStatusList(String statusList){
+        ArrayList<StatusPair> output = new ArrayList<StatusPair>();
+        if (statusList != null){
+            String[] split = TextUtils.split(statusList,";");
+            for (String s : split){
+                output.add(new StatusPair(s));
+            }
+        }
+        return output;
+    }
+
+    public static String statusListToString(ArrayList<StatusPair> statusList){
+        String output = "";
+        if (statusList != null){
+            output = TextUtils.join(";",statusList);
+        }
+        return output;
+    }
+
+    public TrackingItem(int id, String name,
+                        String trackingNumber, Date dateCreated,
+                        Date lastQuery, ArrayList<StatusPair> statusList,
+                        int packageStatus, int packageStatusManual,
+                        String originCountry, String destinationCountry,
+                        int courier) {
+        this.id = id;
         mName = name;
-        mHash = "";
         mTrackingNumber = trackingNumber;
-        mStatusList = new ArrayList<StatusPair>();
-        mLabelIDS = new ArrayList<Long>();
-        mStatus = "--";
-        mStatusOld = "--";
-        mLastUpdated = new Date(0);
+        mDateCreated = dateCreated;
+        mLastQuery = lastQuery;
+        mStatusList = statusList;
+        mPackageStatus = packageStatus;
+        mPackageStatusManual = packageStatusManual;
+        mOriginCountry = originCountry;
+        mDestinationCountry = destinationCountry;
+        mCourier = courier;
+
+        mLabelIDS = new ArrayList<Integer>();
+        mStatusServer = "";
         mLastQuery = new Date(0);
-        mLastStatusChangedOverride = new Date(0);
-        mLastStatusChanged = new Date(0);
-        id = new Date().getTime();
+
         if (isManualMode()) {
             // set manual mode
-            mFirstTimeUpdated = new Date();
             mPackageStatusOverride = PACKAGE_STATUS_IN_TRANSIT;
-            mStatus = "Manual tracking enabled.";
+            mStatusServer = "Manual tracking enabled.";
         }
     }
 
@@ -206,8 +242,8 @@ public class TrackingItem {
         return null;
     }
 
-    public boolean hasLabel(long labelID) {
-        return mLabelIDS.indexOf(labelID) == -1 ? false : true;
+    public boolean hasLabel(Integer labelID) {
+        return mLabelIDS.indexOf(labelID) != -1;
     }
 
     public boolean hasCustomLabels() {
@@ -215,17 +251,16 @@ public class TrackingItem {
             String name = ItemManager.getLabel(mLabelIDS.get(i)).getName();
             if (name.compareTo(ItemManager.LABEL_CATEGORY_NONE) != 0 && name.compareTo(ItemManager.LABEL_CATEGORY_UNFINISHED) != 0)
                 return true;
-            ;
         }
         return false;
     }
 
-    public void removeLabel(long labelID) {
+    public void removeLabel(Integer labelID) {
         mLabelIDS.remove(labelID);
     }
 
-    public void addLabel(long labelID) {
-        if (hasLabel(labelID) == false) {
+    public void addLabel(Integer labelID) {
+        if (!hasLabel(labelID)) {
             mLabelIDS.add(labelID);
         }
     }
@@ -238,12 +273,12 @@ public class TrackingItem {
         return mName;
     }
 
-    public void setName(String name) {
-        mName = name;
+    public Date getDateCreated() {
+        return mDateCreated;
     }
 
-    public void setHash(String hash) {
-        mHash = hash;
+    public void setName(String name) {
+        mName = name;
     }
 
     public String getTrackingNumber() {
@@ -255,7 +290,6 @@ public class TrackingItem {
             return;
         mLastQuery = new Date(0);
         mTrackingNumber = trackingNumber;
-        mHash = "";
         if (mTrackingNumber.matches("^[a-zA-Z]{2}\\d{9}[a-zA-Z]{2}$")) {
             // global postal
             setCourier(COURIER_GLOBAL_POSTAL);
@@ -264,36 +298,24 @@ public class TrackingItem {
         }
         if (isManualMode()) {
             // set manual mode
-            mFirstTimeUpdated = new Date();
             mPackageStatusOverride = PACKAGE_STATUS_IN_TRANSIT;
-            mStatus = "Manual tracking enabled.";
+            mStatusServer = "Manual tracking enabled.";
         }
-    }
-
-    public String getHash() {
-        return mHash;
     }
 
     public void update(Date firstDate, Date lastDate, String lastStatus, ArrayList<StatusPair> status, int package_status) {
-        if (mHash == null || mHash == "") {
-
-        }
-        // Update mStatus
-        //mStatus = lastStatus;
-        mStatusOld = lastStatus;
+        // Update mStatusServer
         mStatusList.clear();
         mStatusList.addAll(status);
-        // Update mLastUpdated
-        mLastUpdated = new Date();
-        mLastStatusChanged = lastDate;
-        mFirstTimeUpdated = firstDate;
+
         // update delivered status
         mPackageStatus = package_status;
-        mPackageStatusOld = mPackageStatus;
+
+        ItemManager.getInstance(null).saveTrackingItem(this);
     }
 
     public void setStatus(int status){
-        setStatus(status,STATUS_SERVER_STATE_NORMAL_TRACKING,STATUS_SERVER_STATE_NORMAL_TRACKING);
+        setStatus(status, STATUS_SERVER_STATE_NORMAL_TRACKING, STATUS_SERVER_STATE_NORMAL_TRACKING);
     }
 
     public void setStatus(int status, int server_status_origin,int server_status_destination) {
@@ -301,141 +323,138 @@ public class TrackingItem {
         switch (mCurrentStatusFlag) {
             case STATUS_IDLE:
                 // Ok
-                //mStatus = mStatusOld;
-                mPackageStatus = mPackageStatusOld;
                 switch (server_status_origin) {
                     case STATUS_SERVER_STATE_NORMAL_TRACKING:
-                        mStatus = STATUS_SERVER_STATE_STRING_NORMAL_TRACKING;
+                        mStatusServer = STATUS_SERVER_STATE_STRING_NORMAL_TRACKING;
                         break;
                     case STATUS_SERVER_STATE_NOT_FOUND:
-                        mStatus = "(Origin Country)" + STATUS_SERVER_STATE_STRING_NOT_FOUND + "\n";
+                        mStatusServer = "(Origin Country)" + STATUS_SERVER_STATE_STRING_NOT_FOUND + "\n";
                         break;
                     case STATUS_SERVER_STATE_WEB_ERROR:
-                        mStatus = "(Origin Country)" + STATUS_SERVER_STATE_STRING_WEB_ERROR + "\n";
+                        mStatusServer = "(Origin Country)" + STATUS_SERVER_STATE_STRING_WEB_ERROR + "\n";
                         break;
                     case STATUS_SERVER_STATE_PROCESS_ERROR:
-                        mStatus = "(Origin Country)" + STATUS_SERVER_STATE_STRING_PROCESS_ERROR + "\n";
+                        mStatusServer = "(Origin Country)" + STATUS_SERVER_STATE_STRING_PROCESS_ERROR + "\n";
                         break;
                     case STATUS_SERVER_STATE_SERVICE_ERROR:
-                        mStatus = "(Origin Country)" + STATUS_SERVER_STATE_STRING_SERVICE_ERROR + "\n";
+                        mStatusServer = "(Origin Country)" + STATUS_SERVER_STATE_STRING_SERVICE_ERROR + "\n";
                         break;
                     case STATUS_SERVER_STATE_CACHE_WEB_ERROR:
-                        mStatus = "(Origin Country)" + STATUS_SERVER_STATE_STRING_CACHE_WEB_ERROR + "\n";
+                        mStatusServer = "(Origin Country)" + STATUS_SERVER_STATE_STRING_CACHE_WEB_ERROR + "\n";
                         break;
                     case STATUS_SERVER_STATE_CACHE_SERVICE_ERROR:
-                        mStatus = "(Origin Country)" + STATUS_SERVER_STATE_STRING_CACHE_SERVICE_ERROR + "\n";
+                        mStatusServer = "(Origin Country)" + STATUS_SERVER_STATE_STRING_CACHE_SERVICE_ERROR + "\n";
                         break;
                     case STATUS_SERVER_STATE_CACHE_PROCESS_ERROR:
-                        mStatus = "(Origin Country)" + STATUS_SERVER_STATE_STRING_CACHE_PROCESS_ERROR + "\n";
+                        mStatusServer = "(Origin Country)" + STATUS_SERVER_STATE_STRING_CACHE_PROCESS_ERROR + "\n";
                         break;
 
                     case STATUS_SERVER_STATE_UNABLE_TO_TRACK:
                     default:
-                        mStatus = "(Origin Country)" + STATUS_SERVER_STATE_STRING_UNABLE_TO_TRACK + "\n";
+                        mStatusServer = "(Origin Country)" + STATUS_SERVER_STATE_STRING_UNABLE_TO_TRACK + "\n";
                         break;
                 }
 
                 switch (server_status_destination) {
                     case STATUS_SERVER_STATE_NORMAL_TRACKING:
-                        mStatus = STATUS_SERVER_STATE_STRING_NORMAL_TRACKING;
+                        mStatusServer = STATUS_SERVER_STATE_STRING_NORMAL_TRACKING;
                         break;
                     case STATUS_SERVER_STATE_NOT_FOUND: //this one generates spam
-                        //mStatus += ", (Destination Country)" + STATUS_SERVER_STATE_STRING_NOT_FOUND;
+                        //mStatusServer += ", (Destination Country)" + STATUS_SERVER_STATE_STRING_NOT_FOUND;
                         break;
                     case STATUS_SERVER_STATE_WEB_ERROR:
                         if (server_status_origin == STATUS_SERVER_STATE_NORMAL_TRACKING){
-                            mStatus = "";
+                            mStatusServer = "";
                         }
-                        mStatus += "(Destination Country)" + STATUS_SERVER_STATE_STRING_WEB_ERROR;
+                        mStatusServer += "(Destination Country)" + STATUS_SERVER_STATE_STRING_WEB_ERROR;
                         break;
                     case STATUS_SERVER_STATE_PROCESS_ERROR:
                         if (server_status_origin == STATUS_SERVER_STATE_NORMAL_TRACKING){
-                            mStatus = "";
+                            mStatusServer = "";
                         }
-                        mStatus += "(Destination Country)" + STATUS_SERVER_STATE_STRING_PROCESS_ERROR;
+                        mStatusServer += "(Destination Country)" + STATUS_SERVER_STATE_STRING_PROCESS_ERROR;
                         break;
                     case STATUS_SERVER_STATE_SERVICE_ERROR:
                         if (server_status_origin == STATUS_SERVER_STATE_NORMAL_TRACKING){
-                            mStatus = "";
+                            mStatusServer = "";
                         }
-                        mStatus += "(Destination Country)" + STATUS_SERVER_STATE_STRING_SERVICE_ERROR;
+                        mStatusServer += "(Destination Country)" + STATUS_SERVER_STATE_STRING_SERVICE_ERROR;
                         break;
                     case STATUS_SERVER_STATE_CACHE_WEB_ERROR:
                         if (server_status_origin == STATUS_SERVER_STATE_NORMAL_TRACKING){
-                            mStatus = "";
+                            mStatusServer = "";
                         }
-                        mStatus += "(Destination Country)" + STATUS_SERVER_STATE_STRING_CACHE_WEB_ERROR;
+                        mStatusServer += "(Destination Country)" + STATUS_SERVER_STATE_STRING_CACHE_WEB_ERROR;
                         break;
                     case STATUS_SERVER_STATE_CACHE_PROCESS_ERROR:
                         if (server_status_origin == STATUS_SERVER_STATE_NORMAL_TRACKING){
-                            mStatus = "";
+                            mStatusServer = "";
                         }
-                        mStatus += "(Destination Country)" + STATUS_SERVER_STATE_STRING_CACHE_PROCESS_ERROR;
+                        mStatusServer += "(Destination Country)" + STATUS_SERVER_STATE_STRING_CACHE_PROCESS_ERROR;
                         break;
                     case STATUS_SERVER_STATE_CACHE_SERVICE_ERROR:
                         if (server_status_origin == STATUS_SERVER_STATE_NORMAL_TRACKING){
-                            mStatus = "";
+                            mStatusServer = "";
                         }
-                        mStatus += "(Destination Country)" + STATUS_SERVER_STATE_STRING_CACHE_SERVICE_ERROR;
+                        mStatusServer += "(Destination Country)" + STATUS_SERVER_STATE_STRING_CACHE_SERVICE_ERROR;
                         break;
 
                     case STATUS_SERVER_STATE_UNABLE_TO_TRACK:
                     default:
                         if (server_status_origin == STATUS_SERVER_STATE_NORMAL_TRACKING){
-                            mStatus = "";
+                            mStatusServer = "";
                         }
-                        mStatus += "(Destination Country)" + STATUS_SERVER_STATE_STRING_UNABLE_TO_TRACK;
+                        mStatusServer += "(Destination Country)" + STATUS_SERVER_STATE_STRING_UNABLE_TO_TRACK;
                         break;
                 }
 
                 return;
             case STATUS_SEARCHING_COURIER:
-                mStatus = "Searching for correct courier...";
+                mStatusServer = "Searching for correct courier...";
                 break;
             case STATUS_UPDATING:
-                mStatus = "Updating...";
+                mStatusServer = "Updating...";
                 break;
             case STATUS_ERROR_ILLEGAL_1:
-                mStatus = "Server Error 1.";
+                mStatusServer = "Server Error 1.";
                 break;
             case STATUS_ERROR_ILLEGAL_2:
-                mStatus = "Server Error 2.";
+                mStatusServer = "Server Error 2.";
                 break;
             case STATUS_ERROR_SYSTEM_UPDATING:
-                mStatus = "The system is being updated, try again later.";
+                mStatusServer = "The system is being updated, try again later.";
                 break;
             case STATUS_ERROR_ILLEGAL_4:
-                mStatus = "Server Error 4.";
+                mStatusServer = "Server Error 4.";
                 break;
             case STATUS_ERROR_TRACKING_TOO_OFTEN:
-                mStatus = "Your tracking is too often, try again later.";
+                mStatusServer = "Your tracking is too often, try again later.";
                 break;
             case STATUS_ERROR_WEBSITE:
-                mStatus = "Website type error try again later.";
+                mStatusServer = "Website type error try again later.";
                 break;
             case STATUS_ERROR_TRACKING_NUMBER:
-                mStatus = "Not yet processed, or tracking number error.";
+                mStatusServer = "Not yet processed, or tracking number error.";
                 break;
             case STATUS_ERROR_CAPTCHA:
-                mStatus = "Tracking bloqued by server, try later.";
+                mStatusServer = "Tracking bloqued by server, try later.";
                 break;
             case STATUS_ERROR_WEB_PROXY:
-                mStatus = "Please disable web proxy.";
+                mStatusServer = "Please disable web proxy.";
                 break;
 
             case STATUS_ERROR_INTERNET:
-                mStatus = "No internet connection.";
+                mStatusServer = "No internet connection.";
                 break;
             case STATUS_ERROR_CONNECTION_TIMEOUT:
-                mStatus = "Connection time out.";
+                mStatusServer = "Connection time out.";
                 break;
             case STATUS_ERROR_NO_HTTP_RESPONSE:
-                mStatus = "No response from server.";
+                mStatusServer = "No response from server.";
                 break;
             case STATUS_ERROR_UNKNOWN:
             default:
-                mStatus = "Unkown error.";
-                //mStatusOld = mStatus;
+                mStatusServer = "Unkown error.";
                 break;
         }
         //mPackageStatus = PACKAGE_STATUS_NO_INFO;
@@ -445,12 +464,40 @@ public class TrackingItem {
         return mStatusList;
     }
 
-    public String getStatus() {
-        return mStatusOld;
+    public StatusPair getLastStatus() {
+        if (mStatusList.size() != 0)
+            return mStatusList.get(0);
+        return new StatusPair();
     }
 
-    public Date getLastUpdated() {
-        return mLastUpdated;
+    public Date getLastDateUpdated(){
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd' 'HH:mm");
+        String dateString = null;
+        Date d;
+        if (mStatusList.size() != 0)
+            dateString = mStatusList.get(0).mTime;
+        try {
+            d = format.parse(dateString);
+        }catch (Exception e){
+            e.printStackTrace();
+            return new Date(0);
+        }
+        return d;
+    }
+
+    public Date getFirstDateUpdated(){
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd' 'HH:mm");
+        String dateString = null;
+        Date d;
+        if (mStatusList.size() != 0)
+            dateString = mStatusList.get(mStatusList.size() - 1).mTime;
+        try {
+            d = format.parse(dateString);
+        }catch (Exception e){
+            e.printStackTrace();
+            return new Date(0);
+        }
+        return d;
     }
 
     public boolean canUpdate() {
@@ -462,13 +509,13 @@ public class TrackingItem {
         try {
             Date date = new Date();
             if (mPackageStatus == PACKAGE_STATUS_DELIVERED) {
-                date = mLastStatusChanged;
+                date = getLastDateUpdated();
             }
             if (mPackageStatusOverride == PACKAGE_STATUS_DELIVERED || mPackageStatusOverride == PACKAGE_STATUS_CLAIMED) {
                 date = mLastStatusChangedOverride;
             }
-            return (int) ((date.getTime() - mFirstTimeUpdated.getTime()) / (1000 * 3600 * 24));
-        } catch (Exception e) {
+            return (int) ((date.getTime() - mDateCreated.getTime()) / (1000 * 3600 * 24));
+        } catch (Exception ignored) {
 
         }
         return 0;
@@ -476,8 +523,8 @@ public class TrackingItem {
 
     public int getDaysSince(Date date) {
         try {
-            return (int) ((date.getTime() - mFirstTimeUpdated.getTime()) / (1000 * 3600 * 24));
-        } catch (Exception e) {
+            return (int) ((date.getTime() - mDateCreated.getTime()) / (1000 * 3600 * 24));
+        } catch (Exception ignored) {
 
         }
         return 0;
@@ -486,20 +533,16 @@ public class TrackingItem {
     @SuppressLint("SimpleDateFormat")
     public int getDaysSince(String date) {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd' 'HH:mm");
+        int days = 0;
         try {
             Date dateDate = format.parse(date);
-            return (int) ((dateDate.getTime() - mFirstTimeUpdated.getTime()) / (1000 * 3600 * 24));
-        } catch (Exception e) {
-
-        }
-        return 0;
-    }
-
-    public boolean hasHash() {
-        if (mHash == null || mHash == "") {
-            return false;
-        }
-        return true;
+            days =  (int) ((dateDate.getTime() - mDateCreated.getTime()) / (1000 * 3600 * 24));
+            if (days <0){
+                //get day from first update
+                days =  (int) ((dateDate.getTime() - getFirstDateUpdated().getTime()) / (1000 * 3600 * 24));
+            }
+        } catch (Exception ignored) { }
+        return days;
     }
 
     public int getPackageStatus() {
@@ -587,11 +630,22 @@ public class TrackingItem {
         return mPackageStatusOverride != TrackingItem.PACKAGE_STATUS_NO_INFO;
     }
 
-    public long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setlastQuery(Date date) {
+    public void setLastQuery(Date date) {
         mLastQuery = date;
     }
+    public Date getLastQuery() {
+        return mLastQuery;
+    }
+    public String getOriginCountry() {
+        return mOriginCountry;
+    }
+
+    public String getDestinationCountry() {
+        return mDestinationCountry;
+    }
+
 }

@@ -8,15 +8,15 @@ import java.util.Date;
 public class Label{
     private String mName;
     private LabelFactory.LabelColor mColor;
-    private long id;
+    private int id;
 
-    private ArrayList<Long> mItemIDS;
+    private ArrayList<Integer> mItemIDS;
 
-    public Label(String name, LabelFactory.LabelColor color) {
+    public Label(int id, String name, LabelFactory.LabelColor color) {
         mName = name;
         mColor = color;
-        mItemIDS = new ArrayList<Long>();
-        id = new Date().getTime();
+        mItemIDS = new ArrayList<Integer>();
+        this.id = id;
     }
 
     public LabelFactory.LabelColor getColor() {
@@ -35,17 +35,17 @@ public class Label{
         return mName;
     }
 
-    public void addTrackingItem(Long itemID) {
+    public void addTrackingItem(int itemID) {
         if (hasTrackingItem(itemID) == false) {
             mItemIDS.add(itemID);
         }
     }
 
-    public boolean hasTrackingItem(long itemID) {
+    public boolean hasTrackingItem(Integer itemID) {
         return mItemIDS.indexOf(itemID) == -1 ? false : true;
     }
 
-    public void removeTrackingItem(Long itemID) {
+    public void removeTrackingItem(Integer itemID) {
         mItemIDS.remove(itemID);
     }
 
@@ -67,7 +67,7 @@ public class Label{
         return output;
     }
 
-    public long getId() {
+    public int getId() {
         return id;
     }
 }

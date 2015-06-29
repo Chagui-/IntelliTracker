@@ -21,17 +21,6 @@ public class MyApplication extends Application {
 
 		loadEntries();
 
-		LabelFactory.LABEL_COLORS.add(new LabelColor("Red 1", getApplicationContext().getResources().getColor(R.color.label_red_1), Color.WHITE));
-		LabelFactory.LABEL_COLORS.add(new LabelColor("Green 1", getApplicationContext().getResources().getColor(R.color.label_green_1), Color.WHITE));
-		LabelFactory.LABEL_COLORS.add(new LabelColor("Yellow 1", getApplicationContext().getResources().getColor(R.color.label_yellow_1), Color.WHITE));
-		LabelFactory.LABEL_COLORS.add(new LabelColor("Purple 1", getApplicationContext().getResources().getColor(R.color.label_purple_1), Color.WHITE));
-		LabelFactory.LABEL_COLORS.add(new LabelColor("Blue 1", getApplicationContext().getResources().getColor(R.color.label_blue_1), Color.WHITE));
-
-		LabelFactory.LABEL_COLORS.add(new LabelColor("Red 2", getApplicationContext().getResources().getColor(R.color.label_red_2), Color.WHITE));
-		LabelFactory.LABEL_COLORS.add(new LabelColor("Green 2", getApplicationContext().getResources().getColor(R.color.label_green_2), Color.WHITE));
-		LabelFactory.LABEL_COLORS.add(new LabelColor("Yellow 2", getApplicationContext().getResources().getColor(R.color.label_yellow_2), Color.WHITE));
-		LabelFactory.LABEL_COLORS.add(new LabelColor("Purple 2", getApplicationContext().getResources().getColor(R.color.label_purple_2), Color.WHITE));
-		LabelFactory.LABEL_COLORS.add(new LabelColor("Blue 2", getApplicationContext().getResources().getColor(R.color.label_blue_2), Color.WHITE));
 		// if (ItemManager.isEmpty()) {
 		// ItemManager.addTrackingItem("Cables" , "RF252387055SG");
 		// ItemManager.addTrackingItem("Tarjeta de Sonido" , "RJ141559891CN");
@@ -68,14 +57,14 @@ public class MyApplication extends Application {
 	static public void saveEntries(android.content.Context context) {
 		SharedPreferences appSharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
 		Editor prefsEditor = appSharedPrefs.edit();
-		ItemManager.saveAsJson(prefsEditor);
+		//ItemManager.saveAsJson(prefsEditor);
 
 		prefsEditor.commit();
 	}
 
 	protected void loadEntries() {
 		SharedPreferences appSharedPrefs = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
-		ItemManager.loadFromJson(appSharedPrefs);
+		//ItemManager.loadFromJson(appSharedPrefs);
 	}
 
 }

@@ -139,7 +139,7 @@ public class PackageTrakingAdapter extends BaseAdapter {
 				PopupMenu popup = new PopupMenu(mContext, v);
 				// Inflating the Popup using xml file
 				popup.getMenuInflater().inflate(R.menu.list_dropdown_more, popup.getMenu());
-				if (item.isArchive()) {
+				if (item.isArchived()) {
 					popup.getMenu().removeItem(R.id.archive);
 				} else {
 					popup.getMenu().removeItem(R.id.unArchive);
@@ -161,7 +161,7 @@ public class PackageTrakingAdapter extends BaseAdapter {
 		holder.time.setText("" + item.getDaysInTransit() + " days");
 		holder.name.setText(item.getName());
 		holder.trackingNumber.setText(item.getTrackingNumber());
-		holder.status.setText(item.getStatus());
+		holder.status.setText(item.getLastStatus().mStatus);
 		if (item.getStatusServer().equals(TrackingItem.STATUS_SERVER_STATE_STRING_NORMAL_TRACKING)){
 			holder.statusServer.setVisibility(View.GONE);
 		}else{

@@ -47,7 +47,7 @@ public class ItemDetailFragment extends Fragment implements TrackingListener {
 		setHasOptionsMenu(true);
 		if (getArguments().containsKey(ARG_ITEM_ID)) {
 			try {
-				mItem = ItemManager.getTrackingItem(getArguments().getLong(ARG_ITEM_ID));
+				mItem = ItemManager.getTrackingItem(getArguments().getInt(ARG_ITEM_ID));
 			} catch (Exception e) {
 				// No item to display
 				mItem = null;

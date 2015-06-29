@@ -67,6 +67,7 @@ public class ItemListActivity extends FragmentActivity implements ItemListFragme
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_item_list);
 
+
 		if (findViewById(R.id.item_detail_container) != null) {
 			// The detail container view will be present only in the
 			// large-screen layouts (res/values-large and
@@ -200,7 +201,7 @@ public class ItemListActivity extends FragmentActivity implements ItemListFragme
 			// adding or replacing the detail fragment using a
 			// fragment transaction.
 			Bundle arguments = new Bundle();
-			arguments.putLong(ItemDetailFragment.ARG_ITEM_ID, item.getId());
+			arguments.putInt(ItemDetailFragment.ARG_ITEM_ID, item.getId());
 			ItemDetailFragment fragment = new ItemDetailFragment();
 			fragment.setArguments(arguments);
 			getSupportFragmentManager().beginTransaction().replace(R.id.item_detail_container, fragment).commit();

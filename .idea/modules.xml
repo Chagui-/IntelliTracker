@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/IntelliTracker.iml" filepath="$PROJECT_DIR$/IntelliTracker.iml" />
+      <module fileurl="file://$PROJECT_DIR$/fileExplorer/fileExplorer.iml" filepath="$PROJECT_DIR$/fileExplorer/fileExplorer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/intelliTracker/intelliTracker.iml" filepath="$PROJECT_DIR$/intelliTracker/intelliTracker.iml" />
+    </modules>
+  </component>
+</project>

@@ -97,7 +97,7 @@ public class TrackingManager {
 					break;
 				case DOWNLOAD_COMPLETE:
 					// check if it was updated
-					if (item.getLastUpdated().compareTo(trackingTask.getLastdateDate()) < 0) {
+					if (item.getLastDateUpdated().compareTo(trackingTask.getLastdateDate()) < 0) {
 						ItemManager.popItem(item);
 						sTrackingManager.notifyListeners(item);
 						Toast.makeText(mContext, "Updated: " + item.getName(), Toast.LENGTH_LONG).show();
@@ -111,7 +111,6 @@ public class TrackingManager {
 					else if (trackingTask.getDelivered() == 10)
 						package_status = TrackingItem.PACKAGE_STATUS_IN_TRANSIT;
 					else package_status = TrackingItem.PACKAGE_STATUS_NO_INFO;
-					//TODO: add return to sender status
 
 					item.update(trackingTask.getFirstdateDate(), trackingTask.getLastdateDate(), trackingTask.getLastStatus(), trackingTask.getStatus(),
 							package_status);

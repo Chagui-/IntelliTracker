@@ -72,9 +72,16 @@ public class ItemListFragment extends Fragment implements TrackingListener, onCu
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+		ItemManager.getInstance(getActivity().getApplicationContext());
+		//testDebug();
+
 		mAdapter = new PackageTrakingAdapter(getActivity());
 		mAdapter.setItems(ItemManager.getSelectedItems());
 		setHasOptionsMenu(true);
+	}
+
+	private void testDebug() {
+		ItemManager.getInstance(null).createTrackingItem("TheName", "TheTrackingNumber");
 	}
 
 	@Override

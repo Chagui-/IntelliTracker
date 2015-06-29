@@ -132,7 +132,7 @@ public class DialogFactory {
 							} else { // add label to list
 								Label label = ItemManager.getLabel(menuItem.getTitle().toString());
 								LabelFactory.createLabel(layoutForLabels, mLabelsToAdd, mLabelsToRemove, label, mContext);
-								mLabelsToAdd.add(label);
+								//mLabelsToAdd.add(label);
 							}
 							return true;
 						}

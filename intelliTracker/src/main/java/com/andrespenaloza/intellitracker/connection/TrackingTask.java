@@ -2,11 +2,8 @@ package com.andrespenaloza.intellitracker.connection;
 
 import android.text.TextUtils;
 
-import com.andrespenaloza.intellitracker.MyApplication;
-import com.andrespenaloza.intellitracker.objects.ItemManager;
 import com.andrespenaloza.intellitracker.objects.TrackingItem;
 import com.andrespenaloza.intellitracker.objects.TrackingItem.StatusPair;
-import com.andrespenaloza.intellitracker.objects.JavaScriptInterpreter;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NoHttpResponseException;
@@ -21,9 +18,6 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.Function;
-import org.mozilla.javascript.Scriptable;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -157,7 +151,7 @@ public class TrackingTask implements Runnable {
 			// Item deleted while updating
 		} finally {
 
-			if (cachedUpdate == false) {
+			if (!cachedUpdate) {
 				if (mResponse != null) {
 					handleState(TrackingManager.DOWNLOAD_COMPLETE);
 				}
@@ -179,7 +173,7 @@ public class TrackingTask implements Runnable {
 			handleState(TrackingManager.SEARCHING_COURIER);
 			findCourier();
 		} else {
-			connectCourier(mItemWeakReference.get().getCourier(), mItemWeakReference.get().getHash());
+			connectCourier(mItemWeakReference.get().getCourier());
 		}
 
 	}
@@ -295,7 +289,7 @@ public class TrackingTask implements Runnable {
 //				break;
 //			}
 
-			if (connectCourier(i, "") == true) {
+			if (connectCourier(i)) {
 				mItemWeakReference.get().setCourier(i);
 				return;
 			}
@@ -303,9 +297,8 @@ public class TrackingTask implements Runnable {
 		downloadFailed(TrackingItem.STATUS_ERROR_TRACKING_NUMBER);
 	}
 
-	private boolean connectCourier(int courier, String hash) throws NullPointerException {
+	private boolean connectCourier(int courier) throws NullPointerException {
 		String url = mTrackingURL;
-		hash = "deprecated";
 		int random_number = (int)(Math.random()*999999);
 		long timestamp = new Date().getTime();
 		if (courier == 100001 || courier == TrackingItem.COURIER_GLOBAL_POSTAL) {
@@ -348,7 +341,7 @@ public class TrackingTask implements Runnable {
 			}
 			return false;
 		}
-		mItemWeakReference.get().setlastQuery(new Date());
+		mItemWeakReference.get().setLastQuery(new Date());
 
 		try {
 			mResponse = new JSONObject(content);
@@ -424,16 +417,16 @@ public class TrackingTask implements Runnable {
 					
 					try{		
 						array.add(pair.getString("b"));
-					}catch (Exception e2){}
-					try{			
+					}catch (Exception ignored){}
+					try{
 						array.add(pair.getString("c"));
-					}catch (Exception e2){}
+					}catch (Exception ignored){}
 					try{			
 						array.add(pair.getString("d"));
-					}catch (Exception e2){}
+					}catch (Exception ignored){}
 					try{			
 						array.add(pair.getString("z"));
-					}catch (Exception e2){};
+					}catch (Exception ignored){}
 					
 					for (int j = 0; j < array.size(); j++) {
 						if (array.get(j) == null || array.get(j).compareTo("null") == 0 || array.get(j).length() == 0){
@@ -458,16 +451,16 @@ public class TrackingTask implements Runnable {
 				
 				try{		
 					array.add(pair.getString("b"));
-				}catch (Exception e2){}
+				}catch (Exception ignored){}
 				try{			
 					array.add(pair.getString("c"));
-				}catch (Exception e2){}
+				}catch (Exception ignored){}
 				try{			
 					array.add(pair.getString("d"));
-				}catch (Exception e2){}
+				}catch (Exception ignored){}
 				try{			
 					array.add(pair.getString("z"));
-				}catch (Exception e2){};
+				}catch (Exception ignored){}
 				
 				for (int j = 0; j < array.size(); j++) {
 					if (array.get(j) == null || array.get(j).compareTo("null") == 0 || array.get(j).length() == 0){
@@ -477,7 +470,7 @@ public class TrackingTask implements Runnable {
 				}
 
 				entry.mTime = pair.getString("a");
-				entry.mStatus = TextUtils.join(",  ",array.toArray());
+				entry.mStatus = TextUtils.join(", ",array.toArray());
 				
 				status.add(entry);
 			}
@@ -491,16 +484,16 @@ public class TrackingTask implements Runnable {
 				
 				try{		
 					array.add(lastStatus_json.getString("b"));
-				}catch (Exception e2){}
+				}catch (Exception ignored){}
 				try{			
 					array.add(lastStatus_json.getString("c"));
-				}catch (Exception e2){}
+				}catch (Exception ignored){}
 				try{			
 					array.add(lastStatus_json.getString("d"));
-				}catch (Exception e2){}
+				}catch (Exception ignored){}
 				try{			
 					array.add(lastStatus_json.getString("z"));
-				}catch (Exception e2){};
+				}catch (Exception ignored){}
 				
 				for (int j = 0; j < array.size(); j++) {
 					if (array.get(j) == null || array.get(j).compareTo("null") == 0 || array.get(j).length() == 0){
@@ -509,7 +502,7 @@ public class TrackingTask implements Runnable {
 					}
 				}
 
-				lastStatus = TextUtils.join(",  ",array.toArray());
+				lastStatus = TextUtils.join(", ",array.toArray());
 				
 				String lastDate = lastStatus_json.getString("a");	
 				lastdateDate = format.parse(lastDate);			
@@ -529,31 +522,8 @@ public class TrackingTask implements Runnable {
 			return false;
 		}
 
-		mItemWeakReference.get().setHash(hash);
-
 		// done
 		return true;
-	}
-
-	private String getItemHash(int courierType) {
-		if (mItemWeakReference.get().hasHash() == false) {
-			// **Code**
-			Context cx = JavaScriptInterpreter.getContext();
-			try {
-				Scriptable scope = cx.initStandardObjects();
-
-				cx.evaluateString(scope, MyApplication.getScript(), "code", 1, null);
-
-				Function fct = (Function) scope.get("hs", scope);
-				Object result = fct.call(cx, scope, scope, new Object[] { mItemWeakReference.get().getTrackingNumber().toUpperCase(Locale.US), courierType });
-				return Context.jsToJava(result, String.class).toString();
-			} catch (Exception e) {
-				e.printStackTrace();
-			} finally {
-				Context.exit();
-			}
-		}
-		return "";
 	}
 
 	public void abortConnection() {
