@@ -15,6 +15,7 @@ import android.widget.TextView;
 import com.andrespenaloza.intellitracker.R;
 import com.andrespenaloza.intellitracker.factory.LabelFactory;
 import com.andrespenaloza.intellitracker.factory.LabelFactory.LabelView;
+import com.andrespenaloza.intellitracker.objects.Courier.Courier;
 import com.andrespenaloza.intellitracker.objects.ItemManager;
 import com.andrespenaloza.intellitracker.objects.Label;
 import com.andrespenaloza.intellitracker.objects.TrackingItem;
@@ -160,7 +161,12 @@ public class PackageTrakingAdapter extends BaseAdapter {
 		});
 		holder.time.setText("" + item.getDaysInTransit() + " days");
 		holder.name.setText(item.getName());
-		holder.trackingNumber.setText(item.getTrackingNumber());
+		String prettyTrackingNumber = item.getTrackingNumber();
+		if (item.getCourierIds().size() > 0){
+			Courier c = Courier.courierList.get(item.getCourierIds().get(0));
+			prettyTrackingNumber = c.getPrettyPrint(prettyTrackingNumber);
+		}
+		holder.trackingNumber.setText(prettyTrackingNumber);
 		holder.status.setText(item.getLastStatus().mStatus);
 		if (item.getStatusServer().equals(TrackingItem.STATUS_SERVER_STATE_STRING_NORMAL_TRACKING)){
 			holder.statusServer.setVisibility(View.GONE);
@@ -168,8 +174,8 @@ public class PackageTrakingAdapter extends BaseAdapter {
 			holder.statusServer.setVisibility(View.VISIBLE);
 		}
 		holder.statusServer.setText(item.getStatusServer());
-		int packageStatusOverride = item.getPackageStatusOverride();
-		if (item.isPackageStatusOverride()) {
+		int packageStatusOverride = item.getPackageStatusManual();
+		if (item.isPackageStatusManual()) {
 			switch (packageStatusOverride) {
 			case TrackingItem.PACKAGE_STATUS_DELIVERED:
 				holder.background.setBackgroundResource(R.drawable.selector_delivered_list);
@@ -196,7 +202,7 @@ public class PackageTrakingAdapter extends BaseAdapter {
 			default:
 				break;
 			}
-			holder.packageStatus.setText(item.getPackageStatusOverrideText());
+			holder.packageStatus.setText(item.getPackageStatusManualText());
 		} else {
 			if (item.getPackageStatus() == TrackingItem.PACKAGE_STATUS_DELIVERED) {
 				holder.background.setBackgroundResource(R.drawable.selector_delivered_list);

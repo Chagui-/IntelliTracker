@@ -3,6 +3,8 @@ package com.andrespenaloza.intellitracker.objects;
 import android.annotation.SuppressLint;
 import android.text.TextUtils;
 
+import com.andrespenaloza.intellitracker.objects.Courier.Courier;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -44,7 +46,7 @@ public class TrackingItem {
     public static final String STATUS_SERVER_STATE_STRING_UNABLE_TO_TRACK 		=
             "Tracking number not recognized or country doesn't support online tracking.";
     public static final String STATUS_SERVER_STATE_STRING_NORMAL_TRACKING 		=
-            "Normal tracking.";
+            "";
     public static final String STATUS_SERVER_STATE_STRING_NOT_FOUND 			=
             "Tracking result isn't available yet.";
     public static final String STATUS_SERVER_STATE_STRING_WEB_ERROR 			=
@@ -76,29 +78,6 @@ public class TrackingItem {
     public static final String PACKAGE_STATUS_STRING_WAITING_FOR_PICKUP 	= "Waiting for pickup";
     public static final String PACKAGE_STATUS_STRING_IN_CUSTOMS 			= "In customs";
 
-    public static final int COURIER_UNKNOWN = 0;
-    public static final int COURIER_GLOBAL_POSTAL = 1;
-    public static final int COURIER_DHL = 100002;
-    public static final int COURIER_UPS = 100003;
-    public static final int COURIER_FEDEX = 100004;
-    public static final int COURIER_TNT = 100005;
-    public static final int COURIER_GLS = 100006;
-    public static final int COURIER_ARAMEX = 100007;
-    public static final int COURIER_DPD = 100008;
-    public static final int COURIER_ESHIPPER = 100009;
-
-    public static final String COURIER_GLOBAL_POSTAL_CODE	= "^([A-Z]{2}\\d{9}[A-Z]{2})$";
-    public static final String COURIER_DHL_CODE 			= "^((\\d{10})|(\\d{9}))$";
-    public static final String COURIER_UPS_CODE 			= "^((1Z[A-Z0-9]{9}\\d{7})|(\\d{10})|(\\d{12})|(\\d{9}))$";
-    public static final String COURIER_FEDEX_CODE 			= "^((\\d{15})|(\\d{12})|(\\d{10}))$";
-    public static final String COURIER_TNT_CODE 			= "^((GD\\d{9}WW)|(\\d{9})|(GE\\d{9}WW)|(\\d{9})|(\\d{6}))$";
-    public static final String COURIER_GLS_CODE 			= "^(([A-Z]{2}\\d{9}GB)|(\\d{20})|(\\d{14})|(\\d{12})|(\\d{11})|(\\d{10}))$";
-    public static final String COURIER_ARAMEX_CODE 			= "^((\\d{20})|(\\d{12})|(\\d{11})|(\\d{10}))$";
-    public static final String COURIER_DPD_CODE 			= "^((\\d{14}[A-Z0-9])|(\\d{14})|(\\d{10}))$";
-    public static final String COURIER_ESHIPPER_CODE 		= "^(([A-Z]{3}\\d{16})|([A-Z]{3}[A-Z0-9]\\d{16})|([A-Z]{5}\\d{16}))$";
-
-    public static final int COURIER_NUMBER = 9;
-
     public static class StatusPair {
         public String mTime;
         public String mStatus;
@@ -119,10 +98,6 @@ public class TrackingItem {
         }
     }
 
-    Date mLastStatusChangedOverride;
-    private int mPackageStatusOverride;
-
-    //new model
     private int id;
     private String mName;
     private String mTrackingNumber;
@@ -133,33 +108,53 @@ public class TrackingItem {
     private int mPackageStatusManual;
     private String mOriginCountry;
     private String mDestinationCountry;
-    private int mCourier;
+    private ArrayList<Integer> mCourierIds;
 
     ArrayList<Integer> mLabelIDS;
-    String mStatusServer; //mStatusServer
-    int mCurrentStatusFlag;
-    ////end new model
-
-    public int getCourier() {
-        return mCourier;
-    }
+    String mStatusServer;
+    int mWorkerStatusFlag;
+    Date mLastPackageStatusManualChanged;
 
     public String getStatusServer() {
         return mStatusServer;
     }
 
-    public int getCourierType() {
-        return mCourier - 1;
+    public ArrayList<Integer> getCourierIds() {
+        return mCourierIds;
     }
 
-    public void setCourier(int courier) {
-        if (courier == 100001)
-            courier = 1;
-        mCourier = courier;
+    public void setCourierId(int c) {
+        mCourierIds.clear();
+        mCourierIds.add(c);
+    }
+
+    public void removeCourierId(int c) {
+        mCourierIds.remove((Integer)c);
+    }
+
+    public static ArrayList<Integer> stringToCourierIds(String courierIds){
+        ArrayList<Integer> output = new ArrayList<Integer>();
+        if (courierIds != null){
+            String[] split = TextUtils.split(courierIds,";");
+            for (String s : split){
+                try {
+                    output.add(Integer.valueOf(s));
+                }catch (NumberFormatException ignored){ }
+            }
+        }
+        return output;
+    }
+
+    public static String courierIdsToString(ArrayList<Integer> courierIds){
+        String output = "";
+        if (courierIds != null){
+            output = TextUtils.join(";",courierIds);
+        }
+        return output;
     }
 
     public int getCurrentStatusFlag() {
-        return mCurrentStatusFlag;
+        return mWorkerStatusFlag;
     }
 
     public boolean archive() {
@@ -201,7 +196,7 @@ public class TrackingItem {
                         Date lastQuery, ArrayList<StatusPair> statusList,
                         int packageStatus, int packageStatusManual,
                         String originCountry, String destinationCountry,
-                        int courier) {
+                        ArrayList<Integer> courier) {
         this.id = id;
         mName = name;
         mTrackingNumber = trackingNumber;
@@ -212,7 +207,8 @@ public class TrackingItem {
         mPackageStatusManual = packageStatusManual;
         mOriginCountry = originCountry;
         mDestinationCountry = destinationCountry;
-        mCourier = courier;
+
+        mCourierIds = courier;
 
         mLabelIDS = new ArrayList<Integer>();
         mStatusServer = "";
@@ -220,7 +216,7 @@ public class TrackingItem {
 
         if (isManualMode()) {
             // set manual mode
-            mPackageStatusOverride = PACKAGE_STATUS_IN_TRANSIT;
+            //mPackageStatusManual = PACKAGE_STATUS_IN_TRANSIT;
             mStatusServer = "Manual tracking enabled.";
         }
     }
@@ -288,17 +284,15 @@ public class TrackingItem {
     public void setTrackingNumber(String trackingNumber) {
         if (mTrackingNumber.compareTo(trackingNumber) == 0)
             return;
-        mLastQuery = new Date(0);
+
         mTrackingNumber = trackingNumber;
-        if (mTrackingNumber.matches("^[a-zA-Z]{2}\\d{9}[a-zA-Z]{2}$")) {
-            // global postal
-            setCourier(COURIER_GLOBAL_POSTAL);
-        } else {
-            setCourier(COURIER_UNKNOWN);
-        }
+
+        // search couriers by tracking number
+        mCourierIds = Courier.getCourierIds(Courier.getCouriersMatchingTracking(trackingNumber));
+
         if (isManualMode()) {
             // set manual mode
-            mPackageStatusOverride = PACKAGE_STATUS_IN_TRANSIT;
+            mPackageStatusManual = PACKAGE_STATUS_IN_TRANSIT;
             mStatusServer = "Manual tracking enabled.";
         }
     }
@@ -319,8 +313,8 @@ public class TrackingItem {
     }
 
     public void setStatus(int status, int server_status_origin,int server_status_destination) {
-        mCurrentStatusFlag = status;
-        switch (mCurrentStatusFlag) {
+        mWorkerStatusFlag = status;
+        switch (mWorkerStatusFlag) {
             case STATUS_IDLE:
                 // Ok
                 switch (server_status_origin) {
@@ -501,8 +495,7 @@ public class TrackingItem {
     }
 
     public boolean canUpdate() {
-        return (new Date().getTime() - mLastQuery.getTime()) / (1000f * 60) > 5f;// 5
-        // min
+        return (new Date().getTime() - mLastQuery.getTime()) / (1000f * 60) > 3f;// 3 min
     }
 
     public int getDaysInTransit() {
@@ -511,10 +504,10 @@ public class TrackingItem {
             if (mPackageStatus == PACKAGE_STATUS_DELIVERED) {
                 date = getLastDateUpdated();
             }
-            if (mPackageStatusOverride == PACKAGE_STATUS_DELIVERED || mPackageStatusOverride == PACKAGE_STATUS_CLAIMED) {
-                date = mLastStatusChangedOverride;
+            if (mPackageStatusManual == PACKAGE_STATUS_DELIVERED || mPackageStatusManual == PACKAGE_STATUS_CLAIMED) {
+                date = mLastPackageStatusManualChanged;
             }
-            return (int) ((date.getTime() - mDateCreated.getTime()) / (1000 * 3600 * 24));
+            return getDaysSince(date);
         } catch (Exception ignored) {
 
         }
@@ -522,12 +515,15 @@ public class TrackingItem {
     }
 
     public int getDaysSince(Date date) {
+        int days = 0;
         try {
-            return (int) ((date.getTime() - mDateCreated.getTime()) / (1000 * 3600 * 24));
-        } catch (Exception ignored) {
-
-        }
-        return 0;
+            days = (int) ((date.getTime() - mDateCreated.getTime()) / (1000 * 3600 * 24));
+            if (days <0){
+                //get day from first update
+                days =  (int) ((date.getTime() - getFirstDateUpdated().getTime()) / (1000 * 3600 * 24));
+            }
+        } catch (Exception ignored) { }
+        return days;
     }
 
     @SuppressLint("SimpleDateFormat")
@@ -553,13 +549,13 @@ public class TrackingItem {
         mPackageStatus = packageStatus;
     }
 
-    public void setPackageStatusOverride(int status) {
-        mPackageStatusOverride = status;
-        mLastStatusChangedOverride = new Date();
+    public void setPackageStatusManual(int status) {
+        mPackageStatusManual = status;
+        mLastPackageStatusManualChanged = new Date();
     }
 
-    public int getPackageStatusOverride() {
-        return mPackageStatusOverride;
+    public int getPackageStatusManual() {
+        return mPackageStatusManual;
     }
 
     public String toString() {
@@ -596,9 +592,9 @@ public class TrackingItem {
         return output;
     }
 
-    public String getPackageStatusOverrideText() {
+    public String getPackageStatusManualText() {
         String output = "";
-        switch (mPackageStatusOverride) {
+        switch (mPackageStatusManual) {
             case TrackingItem.PACKAGE_STATUS_NO_INFO:
                 output = "No Info";
                 break;
@@ -626,8 +622,8 @@ public class TrackingItem {
         return output + " (Manual)";
     }
 
-    public boolean isPackageStatusOverride() {
-        return mPackageStatusOverride != TrackingItem.PACKAGE_STATUS_NO_INFO;
+    public boolean isPackageStatusManual() {
+        return mPackageStatusManual != TrackingItem.PACKAGE_STATUS_NO_INFO;
     }
 
     public int getId() {

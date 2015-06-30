@@ -237,25 +237,25 @@ public class ItemListFragment extends Fragment implements TrackingListener, onCu
 				public boolean onMenuItemClick(MenuItem menuItem) {
 					switch (menuItem.getItemId()) {
 					case R.id.delivered:
-						item.setPackageStatusOverride(TrackingItem.PACKAGE_STATUS_DELIVERED);
+						item.setPackageStatusManual(TrackingItem.PACKAGE_STATUS_DELIVERED);
 						break;
 					case R.id.claimed:
-						item.setPackageStatusOverride(TrackingItem.PACKAGE_STATUS_CLAIMED);
+						item.setPackageStatusManual(TrackingItem.PACKAGE_STATUS_CLAIMED);
 						break;
 					case R.id.customs:
-						item.setPackageStatusOverride(TrackingItem.PACKAGE_STATUS_IN_CUSTOMS);
+						item.setPackageStatusManual(TrackingItem.PACKAGE_STATUS_IN_CUSTOMS);
 						break;
 					case R.id.transit:
-						item.setPackageStatusOverride(TrackingItem.PACKAGE_STATUS_IN_TRANSIT);
+						item.setPackageStatusManual(TrackingItem.PACKAGE_STATUS_IN_TRANSIT);
 						break;
 					case R.id.lost:
-						item.setPackageStatusOverride(TrackingItem.PACKAGE_STATUS_LOST);
+						item.setPackageStatusManual(TrackingItem.PACKAGE_STATUS_LOST);
 						break;
 					case R.id.pickup:
-						item.setPackageStatusOverride(TrackingItem.PACKAGE_STATUS_WAITING_FOR_PICKUP);
+						item.setPackageStatusManual(TrackingItem.PACKAGE_STATUS_WAITING_FOR_PICKUP);
 						break;
 					case R.id.none:
-						item.setPackageStatusOverride(TrackingItem.PACKAGE_STATUS_NO_INFO);
+						item.setPackageStatusManual(TrackingItem.PACKAGE_STATUS_NO_INFO);
 						break;
 					default:
 						return false;

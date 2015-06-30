@@ -15,6 +15,7 @@ import com.andrespenaloza.intellitracker.R;
 import com.andrespenaloza.intellitracker.adapter.DetailTrakingAdapter;
 import com.andrespenaloza.intellitracker.connection.TrackingManager;
 import com.andrespenaloza.intellitracker.connection.TrackingManager.TrackingListener;
+import com.andrespenaloza.intellitracker.objects.Courier.Courier;
 import com.andrespenaloza.intellitracker.objects.ItemManager;
 import com.andrespenaloza.intellitracker.objects.TrackingItem;
 
@@ -74,10 +75,15 @@ public class ItemDetailFragment extends Fragment implements TrackingListener {
 			mAdapter.setItems(mItem.getStatusList(), mItem);
 
 			name_tv.setText(mItem.getName());
-			tracking_tv.setText(mItem.getTrackingNumber());
+			String prettyTrackingNumber = mItem.getTrackingNumber();
+			if (mItem.getCourierIds().size() > 0){
+				Courier c = Courier.courierList.get(mItem.getCourierIds().get(0));
+				prettyTrackingNumber = c.getPrettyPrint(prettyTrackingNumber);
+			}
+			tracking_tv.setText(prettyTrackingNumber);
 
-			if (mItem.isPackageStatusOverride())
-				mStatusTv.setText(mItem.getPackageStatusOverrideText());
+			if (mItem.isPackageStatusManual())
+				mStatusTv.setText(mItem.getPackageStatusManualText());
 			else
 				mStatusTv.setText(mItem.getPackageStatusText());
 
@@ -110,8 +116,8 @@ public class ItemDetailFragment extends Fragment implements TrackingListener {
 		}else{
 			mStatusServerTv.setVisibility(View.VISIBLE);
 		}
-		if (mItem.isPackageStatusOverride())
-			mStatusTv.setText(mItem.getPackageStatusOverrideText());
+		if (mItem.isPackageStatusManual())
+			mStatusTv.setText(mItem.getPackageStatusManualText());
 		else
 			mStatusTv.setText(mItem.getPackageStatusText());
 

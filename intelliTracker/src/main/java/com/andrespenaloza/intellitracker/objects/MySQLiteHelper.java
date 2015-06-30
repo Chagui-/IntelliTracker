@@ -21,7 +21,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
     public static final String TRACKINGITEM_PACKAGE_STATUS_MANUAL = "packageStatusManual";
     public static final String TRACKINGITEM_ORIGIN_COUNTRY = "originCountry";
     public static final String TRACKINGITEM_DESTINATION_COUNTRY = "destinationCountry";
-    public static final String TRACKINGITEM_COURIER_ID = "courierId";
+    public static final String TRACKINGITEM_COURIER_IDS = "courierIds";
     ////
     public static final String TABLE_LABELCOLORS = "labelColors";
     public static final String LABELCOLORS_NAME = "name";
@@ -39,7 +39,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
     ////
 
     private static final String DATABASE_NAME = "intellitracker.db";
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 4;
 
     // Database creation sql statement
     private static final String DATABASE_CREATE_TRAKINGITEM = "create table "
@@ -54,7 +54,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
             + TRACKINGITEM_PACKAGE_STATUS_MANUAL + " integer, "
             + TRACKINGITEM_ORIGIN_COUNTRY + " string, "
             + TRACKINGITEM_DESTINATION_COUNTRY + " string, "
-            + TRACKINGITEM_COURIER_ID + " integer "
+            + TRACKINGITEM_COURIER_IDS + " text "
             + ");";
     private static final String DATABASE_CREATE_LABELCOLORS = "create table "
             + TABLE_LABELCOLORS + "("

@@ -11,6 +11,7 @@ import android.os.SystemClock;
 import com.andrespenaloza.intellitracker.R;
 import com.andrespenaloza.intellitracker.factory.LabelFactory;
 import com.andrespenaloza.intellitracker.factory.LabelFactory.LabelColor;
+import com.andrespenaloza.intellitracker.objects.Courier.Courier;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -35,7 +36,7 @@ public class ItemManager {
             MySQLiteHelper.TRACKINGITEM_DATE_LAST_QUERY, MySQLiteHelper.TRACKINGITEM_LAST_TRACK_RESULT_LIST,
             MySQLiteHelper.TRACKINGITEM_LAST_TRACK_PACKAGE_STATUS, MySQLiteHelper.TRACKINGITEM_PACKAGE_STATUS_MANUAL,
             MySQLiteHelper.TRACKINGITEM_ORIGIN_COUNTRY, MySQLiteHelper.TRACKINGITEM_DESTINATION_COUNTRY,
-            MySQLiteHelper.TRACKINGITEM_COURIER_ID
+            MySQLiteHelper.TRACKINGITEM_COURIER_IDS
     };
 	private String[] LabelColorColumns = { MySQLiteHelper.LABELCOLORS_NAME, MySQLiteHelper.LABELCOLORS_TEXT_COLOR, MySQLiteHelper.LABELCOLORS_BACKGROUND_COLOR	};
 	private String[] LabelColumns = { MySQLiteHelper.LABEL_ID, MySQLiteHelper.LABEL_NAME,MySQLiteHelper.LABEL_COLOR_NAME };
@@ -131,6 +132,7 @@ public class ItemManager {
         values.put(MySQLiteHelper.TRACKINGITEM_NAME, name);
         values.put(MySQLiteHelper.TRACKINGITEM_TRACK_NUMBER, trackingNumber);
         values.put(MySQLiteHelper.TRACKINGITEM_DATE_CREATED, iso8601Format.format(dateNow) );
+		values.put(MySQLiteHelper.TRACKINGITEM_COURIER_IDS, TrackingItem.courierIdsToString(Courier.getCourierIds(Courier.getCouriersMatchingTracking(trackingNumber))) );
         long insertId = database.insert(MySQLiteHelper.TABLE_TRACKINGITEM, null,
                 values);
         Cursor cursor = database.query(MySQLiteHelper.TABLE_TRACKINGITEM,
@@ -175,10 +177,10 @@ public class ItemManager {
 		values.put(MySQLiteHelper.TRACKINGITEM_DATE_LAST_QUERY, iso8601Format.format(trackingItem.getLastQuery()));
 		values.put(MySQLiteHelper.TRACKINGITEM_LAST_TRACK_RESULT_LIST, TrackingItem.statusListToString(trackingItem.getStatusList()));
 		values.put(MySQLiteHelper.TRACKINGITEM_LAST_TRACK_PACKAGE_STATUS, trackingItem.getPackageStatus());
-		values.put(MySQLiteHelper.TRACKINGITEM_PACKAGE_STATUS_MANUAL,trackingItem.getPackageStatusOverride());
+		values.put(MySQLiteHelper.TRACKINGITEM_PACKAGE_STATUS_MANUAL,trackingItem.getPackageStatusManual());
 		values.put(MySQLiteHelper.TRACKINGITEM_ORIGIN_COUNTRY, trackingItem.getOriginCountry());
 		values.put(MySQLiteHelper.TRACKINGITEM_DESTINATION_COUNTRY, trackingItem.getDestinationCountry());
-		values.put(MySQLiteHelper.TRACKINGITEM_COURIER_ID, trackingItem.getCourier());
+		values.put(MySQLiteHelper.TRACKINGITEM_COURIER_IDS, TrackingItem.courierIdsToString(trackingItem.getCourierIds()));
 		long insertId = database.update(MySQLiteHelper.TABLE_TRACKINGITEM,
 				values, MySQLiteHelper.TRACKINGITEM_ID + "=" + trackingItem.getId(),null);
 		return insertId != -1;
@@ -194,7 +196,7 @@ public class ItemManager {
         int packageStatusManual = 0;
         String originCountry = "";
         String destinationCountry = "";
-        int courier = 0;
+        String courierIds = "";
 
         try {
             dateCreated = iso8601Format.parse(cursor.getString(3));
@@ -218,7 +220,7 @@ public class ItemManager {
             destinationCountry = cursor.getString(9);
         } catch (Exception ignored) { }
         try {
-            courier = cursor.getInt(10);
+			courierIds = cursor.getString(10);
         } catch (Exception ignored) { }
 
 
@@ -230,7 +232,7 @@ public class ItemManager {
                     lastQuery,TrackingItem.stringToStatusList(statusList),
                     packageStatus,packageStatusManual,
                     originCountry,destinationCountry,
-                    courier);
+					TrackingItem.stringToCourierIds(courierIds));
         } catch (Exception e) {
             e.printStackTrace();
         }

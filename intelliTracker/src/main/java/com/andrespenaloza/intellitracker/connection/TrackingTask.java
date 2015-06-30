@@ -2,6 +2,8 @@ package com.andrespenaloza.intellitracker.connection;
 
 import android.text.TextUtils;
 
+import com.andrespenaloza.intellitracker.objects.Courier.Courier;
+import com.andrespenaloza.intellitracker.objects.Courier.GlobalPostal;
 import com.andrespenaloza.intellitracker.objects.TrackingItem;
 import com.andrespenaloza.intellitracker.objects.TrackingItem.StatusPair;
 
@@ -105,10 +107,6 @@ public class TrackingTask implements Runnable {
 		mTrackingURL = "http://www.17track.net";
 		// mTrackingURL = "http://s1.17track.net";
 
-		// parse tracking number (compatibility with last versions)
-		if (item.getTrackingNumber().matches(TrackingItem.COURIER_GLOBAL_POSTAL_CODE))
-			item.setCourier(TrackingItem.COURIER_GLOBAL_POSTAL);
-
 		// Instantiates the weak reference to the incoming view
 		mItemWeakReference = new WeakReference<TrackingItem>(item);
 	}
@@ -168,129 +166,26 @@ public class TrackingTask implements Runnable {
 	}
 
 	private void connect() throws NullPointerException {
-		if (mItemWeakReference.get().getCourier() == TrackingItem.COURIER_UNKNOWN) {
-			// get courier, get hash
+		if (mItemWeakReference.get().getCourierIds().size() > 1) {
+			// try to find courier
 			handleState(TrackingManager.SEARCHING_COURIER);
 			findCourier();
-		} else {
-			connectCourier(mItemWeakReference.get().getCourier());
+		} else if (mItemWeakReference.get().getCourierIds().size() == 1){
+			connectCourier(mItemWeakReference.get().getCourierIds().get(0));
 		}
 
-	}
-	
-	private void bringToTop(ArrayList<Integer> list, Integer number){
-		if (list.indexOf(number) > 0){
-			//number exists
-			list.remove(number);
-			list.add(0,number);
-		}
 	}
 
 	private void findCourier() throws NullPointerException {
 		String tracking_number = mItemWeakReference.get().getTrackingNumber().toUpperCase(Locale.US);
 		
 		//build search preferences based on tracking number
-		ArrayList<Integer> courier_list = new ArrayList<Integer>();
-		courier_list.add(TrackingItem.COURIER_GLOBAL_POSTAL);
-		courier_list.add(TrackingItem.COURIER_DHL);
-		courier_list.add(TrackingItem.COURIER_UPS);
-		courier_list.add(TrackingItem.COURIER_FEDEX);
-		courier_list.add(TrackingItem.COURIER_TNT);
-		courier_list.add(TrackingItem.COURIER_GLS);
-		courier_list.add(TrackingItem.COURIER_ARAMEX);
-		courier_list.add(TrackingItem.COURIER_DPD);
-		courier_list.add(TrackingItem.COURIER_ESHIPPER);
+		ArrayList<Courier> couriers = Courier.getCouriersMatchingTracking(tracking_number);
 
-		//bring courier to front of the list, if number matches
-		if (tracking_number.matches(TrackingItem.COURIER_GLOBAL_POSTAL_CODE)){
-			bringToTop(courier_list, TrackingItem.COURIER_GLOBAL_POSTAL);
-			courier_list.remove((Integer)TrackingItem.COURIER_DHL);
-			courier_list.remove((Integer)TrackingItem.COURIER_UPS);      
-			courier_list.remove((Integer)TrackingItem.COURIER_FEDEX);     
-			courier_list.remove((Integer)TrackingItem.COURIER_ARAMEX);   
-			courier_list.remove((Integer)TrackingItem.COURIER_DPD);      
-			courier_list.remove((Integer)TrackingItem.COURIER_ESHIPPER); 
-		}
-		if (tracking_number.matches(TrackingItem.COURIER_DHL_CODE)){
-			bringToTop(courier_list, TrackingItem.COURIER_DHL);
-			courier_list.remove((Integer)TrackingItem.COURIER_ESHIPPER); 
-		}
-		if (tracking_number.matches(TrackingItem.COURIER_UPS_CODE)){
-			bringToTop(courier_list, TrackingItem.COURIER_UPS);
-			courier_list.remove((Integer)TrackingItem.COURIER_ESHIPPER); 
-		}
-		if (tracking_number.matches(TrackingItem.COURIER_FEDEX_CODE)){
-			bringToTop(courier_list, TrackingItem.COURIER_FEDEX); 
-			courier_list.remove((Integer)TrackingItem.COURIER_TNT);  
-			courier_list.remove((Integer)TrackingItem.COURIER_ESHIPPER); 
-		}
-		if (tracking_number.matches(TrackingItem.COURIER_TNT_CODE)){
-			bringToTop(courier_list, TrackingItem.COURIER_TNT);
-			courier_list.remove((Integer)TrackingItem.COURIER_GLS);  
-			courier_list.remove((Integer)TrackingItem.COURIER_ARAMEX);   
-			courier_list.remove((Integer)TrackingItem.COURIER_DPD);      
-			courier_list.remove((Integer)TrackingItem.COURIER_ESHIPPER); 
-		}
-		if (tracking_number.matches(TrackingItem.COURIER_GLS_CODE)){
-			bringToTop(courier_list, TrackingItem.COURIER_GLS);
-			courier_list.remove((Integer)TrackingItem.COURIER_ESHIPPER); 
-		}
-		if (tracking_number.matches(TrackingItem.COURIER_ARAMEX_CODE)){
-			bringToTop(courier_list, TrackingItem.COURIER_ARAMEX);
-			courier_list.remove((Integer)TrackingItem.COURIER_ESHIPPER); 
-		}
-		if (tracking_number.matches(TrackingItem.COURIER_DPD_CODE)){
-			bringToTop(courier_list, TrackingItem.COURIER_DPD);
-			courier_list.remove((Integer)TrackingItem.COURIER_ESHIPPER); 
-		}
-		if (tracking_number.matches(TrackingItem.COURIER_ESHIPPER_CODE)){
-			bringToTop(courier_list, TrackingItem.COURIER_ESHIPPER);
-		}
-		//iterate in sorted list
-		for (Integer i : courier_list/*int i = 1 + 100000; i <= ItemManager.TrackingItem.COURIER_NUMBER + 100000; i++*/) {
-//			switch (i) {
-//			case 100001:
-//				if (tracking_number.matches(TrackingItem.COURIER_GLOBAL_POSTAL_CODE) == false)
-//					continue;
-//				break;
-//			case TrackingItem.COURIER_DHL:
-//				if (tracking_number.matches(TrackingItem.COURIER_DHL_CODE) == false)
-//					continue;
-//				break;
-//			case TrackingItem.COURIER_UPS:
-//				if (tracking_number.matches(TrackingItem.COURIER_UPS_CODE) == false)
-//					continue;
-//				break;
-//			case TrackingItem.COURIER_FEDEX:
-//				if (tracking_number.matches(TrackingItem.COURIER_FEDEX_CODE) == false)
-//					continue;
-//				break;
-//			case TrackingItem.COURIER_TNT:
-//				if (tracking_number.matches(TrackingItem.COURIER_TNT_CODE) == false)
-//					continue;
-//				break;
-//			case TrackingItem.COURIER_GLS:
-//				if (tracking_number.matches(TrackingItem.COURIER_GLS_CODE) == false)
-//					continue;
-//				break;
-//			case TrackingItem.COURIER_ARAMEX:
-//				if (tracking_number.matches(TrackingItem.COURIER_ARAMEX_CODE) == false)
-//					continue;
-//				break;
-//			case TrackingItem.COURIER_DPD:
-//				if (tracking_number.matches(TrackingItem.COURIER_DPD_CODE) == false)
-//					continue;
-//				break;
-//			case TrackingItem.COURIER_ESHIPPER:
-//				if (tracking_number.matches(TrackingItem.COURIER_ESHIPPER_CODE) == false)
-//					continue;
-//				break;
-//			default:
-//				break;
-//			}
+		for (int c : mItemWeakReference.get().getCourierIds()) {
 
-			if (connectCourier(i)) {
-				mItemWeakReference.get().setCourier(i);
+			if (connectCourier(c)) {
+				mItemWeakReference.get().setCourierId(c);
 				return;
 			}
 		}
@@ -299,13 +194,14 @@ public class TrackingTask implements Runnable {
 
 	private boolean connectCourier(int courier) throws NullPointerException {
 		String url = mTrackingURL;
-		int random_number = (int)(Math.random()*999999);
+		long random_number = (long)(Math.random()*99999999999999999999.);
 		long timestamp = new Date().getTime();
-		if (courier == 100001 || courier == TrackingItem.COURIER_GLOBAL_POSTAL) {
+
+		if (courier == new GlobalPostal().getCourierId()) {
 			url += "/r/HandlerTrack.ashx?callback=jQuery"+ random_number + "_" + timestamp;
 			url += "&num=" + mItemWeakReference.get().getTrackingNumber().toUpperCase(Locale.US) + "&pt=0&cm=0&cc=0&_="+ (timestamp + 1);
 		} else {
-			url += "/r/HandlerTrack.ashx?callback=jQuery11"+ random_number + "_" + timestamp +"&et=" + (courier - 1);
+			url += "/r/HandlerTrack.ashx?callback=jQuery"+ random_number + "_" + timestamp +"&et=" + (courier);
 			url += "&num=" + mItemWeakReference.get().getTrackingNumber().toUpperCase(Locale.US) + "&_="+ (timestamp + 1);
 		}
 
@@ -389,17 +285,24 @@ public class TrackingTask implements Runnable {
 			if (e == 0) {
 				// "Not Found"
 				mResponse = null;
-				if (mItemWeakReference.get().getCourier() != TrackingItem.COURIER_UNKNOWN) {
-					// has courier
+				if (mItemWeakReference.get().getCourierIds().size() == 1) {
+					// Has courier
 					mLastErrorStatus = TrackingItem.STATUS_ERROR_TRACKING_NUMBER;
 				}
 				return false;
-			}
+			}else if (e == 20){
+                // "Expired"
+                // This might not be the correct courier
+                mResponse = null;
+                mItemWeakReference.get().removeCourierId(courier);
+                mLastErrorStatus = TrackingItem.STATUS_ERROR_TRACKING_NUMBER;
+                return false;
+            }
 
 			delivered = e;
 			stateOrigin = data.getInt("is1");
 			timeOrigin = data.getInt("ygt1");
-			if (courier == 100001 || courier == TrackingItem.COURIER_GLOBAL_POSTAL) {// global postal
+			if (courier == new GlobalPostal().getCourierId()) {// global postal
 				// get more info
 				stateDestination = data.getInt("is2");
 				timeDestination = data.getInt("ygt2");
