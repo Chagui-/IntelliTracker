@@ -289,6 +289,7 @@ public class TrackingItem {
 
         // search couriers by tracking number
         mCourierIds = Courier.getCourierIds(Courier.getCouriersMatchingTracking(trackingNumber));
+        ItemManager.getInstance(null).saveTrackingItem(this);
 
         if (isManualMode()) {
             // set manual mode

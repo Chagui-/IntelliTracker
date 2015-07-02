@@ -1,15 +1,15 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+    }
     compileSdkVersion 17
     buildToolsVersion "22.0.1"
-
     defaultConfig {
         applicationId "com.andrespenaloza.intellitracker"
         minSdkVersion 15
         targetSdkVersion 17
     }
-
     buildTypes {
         release {
             minifyEnabled false
@@ -21,6 +21,4 @@ android {
 dependencies {
     compile project(':fileExplorer')
     compile 'com.android.support:support-v4:18.0.0'
-    compile 'com.google.code.gson:gson:2.2.4'
-    compile files('libs/rhino1_7R2.jar')
 }

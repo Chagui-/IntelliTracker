@@ -30,7 +30,7 @@ public class ItemManager {
 
 	private SQLiteDatabase database;
 	private MySQLiteHelper dbHelper;
-    private String[] TrackingItemColumns = {
+    public static String[] TrackingItemColumns = {
             MySQLiteHelper.TRACKINGITEM_ID, MySQLiteHelper.TRACKINGITEM_NAME,
             MySQLiteHelper.TRACKINGITEM_TRACK_NUMBER, MySQLiteHelper.TRACKINGITEM_DATE_CREATED,
             MySQLiteHelper.TRACKINGITEM_DATE_LAST_QUERY, MySQLiteHelper.TRACKINGITEM_LAST_TRACK_RESULT_LIST,
@@ -38,9 +38,9 @@ public class ItemManager {
             MySQLiteHelper.TRACKINGITEM_ORIGIN_COUNTRY, MySQLiteHelper.TRACKINGITEM_DESTINATION_COUNTRY,
             MySQLiteHelper.TRACKINGITEM_COURIER_IDS
     };
-	private String[] LabelColorColumns = { MySQLiteHelper.LABELCOLORS_NAME, MySQLiteHelper.LABELCOLORS_TEXT_COLOR, MySQLiteHelper.LABELCOLORS_BACKGROUND_COLOR	};
-	private String[] LabelColumns = { MySQLiteHelper.LABEL_ID, MySQLiteHelper.LABEL_NAME,MySQLiteHelper.LABEL_COLOR_NAME };
-	private String[] LabelTrackingColumns = { MySQLiteHelper.LT_ID_TRACKINGITEM, MySQLiteHelper.LT_ID_LABEL};
+	public static String[] LabelColorColumns = { MySQLiteHelper.LABELCOLORS_NAME, MySQLiteHelper.LABELCOLORS_TEXT_COLOR, MySQLiteHelper.LABELCOLORS_BACKGROUND_COLOR	};
+	public static String[] LabelColumns = { MySQLiteHelper.LABEL_ID, MySQLiteHelper.LABEL_NAME,MySQLiteHelper.LABEL_COLOR_NAME };
+	public static String[] LabelTrackingColumns = { MySQLiteHelper.LT_ID_TRACKINGITEM, MySQLiteHelper.LT_ID_LABEL};
 
     private static ItemManager instance;
 	private Context mContext;
@@ -186,7 +186,7 @@ public class ItemManager {
 		return insertId != -1;
 	}
 
-    private TrackingItem cursorToTrackingItem(Cursor cursor) {
+    public static TrackingItem cursorToTrackingItem(Cursor cursor) {
 		DateFormat iso8601Format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
         Date dateCreated = new Date(0);

@@ -10,6 +10,7 @@ public class FLYT extends Courier {
         mName = "FLYT";
 
         mTrackingPatterns.add(new TrackingPatternPair("^(A\\d{15})$","+ *** *** *** *** ***"));
+        mTrackingPatterns.add(new TrackingPatternPair("^(A\\d{13}CD)$","+ *** *** *** *** *++"));
     }
 }
 

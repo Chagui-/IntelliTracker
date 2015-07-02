@@ -1,9 +1,15 @@
 package com.andrespenaloza.intellitracker.objects;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.HashMap;
 
 /**
  * Created by Andres on 27-06-2015.
@@ -39,14 +45,14 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
     ////
 
     private static final String DATABASE_NAME = "intellitracker.db";
-    private static final int DATABASE_VERSION = 4;
+    private static final int DATABASE_VERSION = 7;
 
     // Database creation sql statement
     private static final String DATABASE_CREATE_TRAKINGITEM = "create table "
             + TABLE_TRACKINGITEM + "("
             + TRACKINGITEM_ID + " integer primary key autoincrement, "
             + TRACKINGITEM_NAME + " text not null, "
-            + TRACKINGITEM_TRACK_NUMBER + " integer not null, "
+            + TRACKINGITEM_TRACK_NUMBER + " text not null, "
             + TRACKINGITEM_DATE_CREATED + " text not null, "
             + TRACKINGITEM_DATE_LAST_QUERY + " text, "
             + TRACKINGITEM_LAST_TRACK_RESULT_LIST + " string, "
@@ -79,6 +85,11 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
             + " FOREIGN KEY ("+LT_ID_TRACKINGITEM+") REFERENCES "+TABLE_TRACKINGITEM+" ("+TRACKINGITEM_ID+"),"
             + " FOREIGN KEY ("+LT_ID_LABEL+") REFERENCES "+TABLE_LABEL+" ("+LABEL_ID+")"
             + ");";
+    private static final String DATABASE_DROP_ALL =
+            "DROP TABLE " + TABLE_TRACKINGITEM +
+            "; DROP TABLE " + TABLE_LABELCOLORS +
+            "; DROP TABLE " + TABLE_LABEL +
+            "; DROP TABLE " + TABLE_LABEL_TRACKINGITEM + ";" ;
 
     MySQLiteHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -86,10 +97,58 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase database) {
+//        database.execSQL("DROP TABLE " + TABLE_TRACKINGITEM + ";");
+//        database.execSQL("DROP TABLE " + TABLE_LABELCOLORS + ";");
+//        database.execSQL("DROP TABLE " + TABLE_LABEL + ";");
+//        database.execSQL("DROP TABLE " + TABLE_LABEL_TRACKINGITEM + ";");
+
+        HashMap<Integer, TrackingItem> items = getAllTrackingItems(database);
+        database.execSQL("DROP TABLE " + TABLE_TRACKINGITEM + ";");
         database.execSQL(DATABASE_CREATE_TRAKINGITEM);
-        database.execSQL(DATABASE_CREATE_LABELCOLORS);
-        database.execSQL(DATABASE_CREATE_LABEL);
-        database.execSQL(DATABASE_CREATE_LABEL_TRACKINGITEM);
+        for (TrackingItem i : items.values()){
+            saveTrackingItem(i,database);
+        }
+
+//        database.execSQL(DATABASE_CREATE_TRAKINGITEM);
+//        database.execSQL(DATABASE_CREATE_LABELCOLORS);
+//        database.execSQL(DATABASE_CREATE_LABEL);
+//        database.execSQL(DATABASE_CREATE_LABEL_TRACKINGITEM);
+    }
+
+    public HashMap<Integer, TrackingItem> getAllTrackingItems(SQLiteDatabase database) {
+        HashMap<Integer, TrackingItem> trackingItems = new HashMap<Integer, TrackingItem>();
+
+        Cursor cursor = database.query(MySQLiteHelper.TABLE_TRACKINGITEM,
+                ItemManager.TrackingItemColumns, null, null, null, null, null);
+
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            TrackingItem trackingItem = ItemManager.cursorToTrackingItem(cursor);
+            trackingItems.put(trackingItem.getId(),trackingItem);
+            cursor.moveToNext();
+        }
+        // make sure to close the cursor
+        cursor.close();
+        return trackingItems;
+    }
+
+    public boolean saveTrackingItem(TrackingItem trackingItem,SQLiteDatabase database) {
+        DateFormat iso8601Format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        ContentValues values = new ContentValues();
+        values.put(MySQLiteHelper.TRACKINGITEM_ID, trackingItem.getId());
+        values.put(MySQLiteHelper.TRACKINGITEM_NAME, trackingItem.getName());
+        values.put(MySQLiteHelper.TRACKINGITEM_TRACK_NUMBER, trackingItem.getTrackingNumber());
+        values.put(MySQLiteHelper.TRACKINGITEM_DATE_CREATED, iso8601Format.format(trackingItem.getDateCreated()) );
+        values.put(MySQLiteHelper.TRACKINGITEM_DATE_LAST_QUERY, iso8601Format.format(trackingItem.getLastQuery()));
+        values.put(MySQLiteHelper.TRACKINGITEM_LAST_TRACK_RESULT_LIST, TrackingItem.statusListToString(trackingItem.getStatusList()));
+        values.put(MySQLiteHelper.TRACKINGITEM_LAST_TRACK_PACKAGE_STATUS, trackingItem.getPackageStatus());
+        values.put(MySQLiteHelper.TRACKINGITEM_PACKAGE_STATUS_MANUAL,trackingItem.getPackageStatusManual());
+        values.put(MySQLiteHelper.TRACKINGITEM_ORIGIN_COUNTRY, trackingItem.getOriginCountry());
+        values.put(MySQLiteHelper.TRACKINGITEM_DESTINATION_COUNTRY, trackingItem.getDestinationCountry());
+        values.put(MySQLiteHelper.TRACKINGITEM_COURIER_IDS, TrackingItem.courierIdsToString(trackingItem.getCourierIds()));
+        long insertId = database.insert(MySQLiteHelper.TABLE_TRACKINGITEM,null,values);
+        return insertId != -1;
     }
 
     @Override
