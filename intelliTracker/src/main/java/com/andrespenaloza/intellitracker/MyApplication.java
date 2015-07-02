@@ -5,8 +5,6 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.preference.PreferenceManager;
 
-import com.andrespenaloza.intellitracker.objects.JavaScriptInterpreter;
-
 public class MyApplication extends Application {
 
 	private static String hs = "";
