@@ -3,7 +3,6 @@ package com.andrespenaloza.intellitracker.objects;
 import com.andrespenaloza.intellitracker.factory.LabelFactory;
 
 import java.util.ArrayList;
-import java.util.Date;
 
 public class Label{
     private String mName;

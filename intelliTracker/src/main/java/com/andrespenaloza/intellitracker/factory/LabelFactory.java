@@ -8,7 +8,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.andrespenaloza.intellitracker.R;
-import com.andrespenaloza.intellitracker.objects.ItemManager;
 import com.andrespenaloza.intellitracker.objects.Label;
 
 import java.util.ArrayList;
