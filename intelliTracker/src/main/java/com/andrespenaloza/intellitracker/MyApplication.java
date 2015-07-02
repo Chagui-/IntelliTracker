@@ -3,12 +3,8 @@ package com.andrespenaloza.intellitracker;
 import android.app.Application;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.graphics.Color;
 import android.preference.PreferenceManager;
 
-import com.andrespenaloza.intellitracker.factory.LabelFactory;
-import com.andrespenaloza.intellitracker.factory.LabelFactory.LabelColor;
-import com.andrespenaloza.intellitracker.objects.ItemManager;
 import com.andrespenaloza.intellitracker.objects.JavaScriptInterpreter;
 
 public class MyApplication extends Application {
@@ -17,7 +13,7 @@ public class MyApplication extends Application {
 
 	@Override
 	public void onCreate() {
-		hs = JavaScriptInterpreter.getStringFromFile("hs.js", getApplicationContext());
+		//hs = JavaScriptInterpreter.getStringFromFile("hs.js", getApplicationContext());
 
 		loadEntries();
 

@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="rhino1_7R2">
-    <CLASSES>
-      <root url="jar://$PROJECT_DIR$/intelliTracker/libs/rhino1_7R2.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>
