@@ -516,15 +516,17 @@ public class TrackingItem {
     }
 
     public int getDaysSince(Date date) {
-        int days = 0;
+        int days_1 = 0;//get day from tracking created
+        int days_2 = 0;//get day from first update
         try {
-            days = (int) ((date.getTime() - mDateCreated.getTime()) / (1000 * 3600 * 24));
-            if (days <0){
-                //get day from first update
-                days =  (int) ((date.getTime() - getFirstDateUpdated().getTime()) / (1000 * 3600 * 24));
-            }
+            days_1 = (int) ((date.getTime() - mDateCreated.getTime()) / (1000 * 3600 * 24));
+            days_2 = (int) ((date.getTime() - getFirstDateUpdated().getTime()) / (1000 * 3600 * 24));
+//            if (days <0){
+//                //get day from first update
+//                days =  (int) ((date.getTime() - getFirstDateUpdated().getTime()) / (1000 * 3600 * 24));
+//            }
         } catch (Exception ignored) { }
-        return days;
+        return days_1 < days_2? days_2 : days_1;
     }
 
     @SuppressLint("SimpleDateFormat")

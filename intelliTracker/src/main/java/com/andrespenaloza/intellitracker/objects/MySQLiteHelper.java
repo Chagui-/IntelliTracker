@@ -102,12 +102,12 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 //        database.execSQL("DROP TABLE " + TABLE_LABEL + ";");
 //        database.execSQL("DROP TABLE " + TABLE_LABEL_TRACKINGITEM + ";");
 
-        HashMap<Integer, TrackingItem> items = getAllTrackingItems(database);
-        database.execSQL("DROP TABLE " + TABLE_TRACKINGITEM + ";");
-        database.execSQL(DATABASE_CREATE_TRAKINGITEM);
-        for (TrackingItem i : items.values()){
-            saveTrackingItem(i,database);
-        }
+//        HashMap<Integer, TrackingItem> items = getAllTrackingItems(database);
+//        database.execSQL("DROP TABLE " + TABLE_TRACKINGITEM + ";");
+//        database.execSQL(DATABASE_CREATE_TRAKINGITEM);
+//        for (TrackingItem i : items.values()){
+//            saveTrackingItem(i,database);
+//        }
 
 //        database.execSQL(DATABASE_CREATE_TRAKINGITEM);
 //        database.execSQL(DATABASE_CREATE_LABELCOLORS);
