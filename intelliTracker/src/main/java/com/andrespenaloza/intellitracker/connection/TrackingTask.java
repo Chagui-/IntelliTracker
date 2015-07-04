@@ -1,5 +1,6 @@
 package com.andrespenaloza.intellitracker.connection;
 
+import android.net.Uri;
 import android.text.TextUtils;
 
 import com.andrespenaloza.intellitracker.objects.Courier.Courier;
@@ -23,6 +24,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.net.URI;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -33,11 +35,13 @@ public class TrackingTask implements Runnable {
 
 	private static TrackingManager sTrackingManager;
 	private String mTrackingURL;
+	private String mUnlockURL;
 	private JSONObject mResponse;
 
 	private WeakReference<TrackingItem> mItemWeakReference;
 	private Thread mCurrentThread;
 	private HttpGet mHttpGet;
+	private boolean mUnlock;
 
 	// The Thread on which this task is currently running.
 
@@ -96,15 +100,17 @@ public class TrackingTask implements Runnable {
 	public TrackingTask() {
 	}
 
-	void initializeDownloaderTask(TrackingManager trackingManager, TrackingItem item) {
+	void initializeDownloaderTask(TrackingManager trackingManager, TrackingItem item, boolean runUnlock) {
 		// Sets this object's ThreadPool field to be the input argument
 		sTrackingManager = trackingManager;
+		mUnlock = runUnlock;
 
 		stateOrigin = 1;
 		stateDestination = 1;
 
 		// Gets the URL for the View
 		mTrackingURL = "http://www.17track.net";
+		mUnlockURL = "http://www.17track.net/en/result/post-details.shtml?nums=";
 		// mTrackingURL = "http://s1.17track.net";
 
 		// Instantiates the weak reference to the incoming view
@@ -171,7 +177,7 @@ public class TrackingTask implements Runnable {
 			handleState(TrackingManager.SEARCHING_COURIER);
 			findCourier();
 		} else if (mItemWeakReference.get().getCourierIds().size() == 1){
-			connectCourier(mItemWeakReference.get().getCourierIds().get(0));
+			connectCourier(mItemWeakReference.get().getCourierIds().get(0),true);
 		}
 
 	}
@@ -184,7 +190,7 @@ public class TrackingTask implements Runnable {
 
 		for (int c : mItemWeakReference.get().getCourierIds()) {
 
-			if (connectCourier(c)) {
+			if (connectCourier(c,true)) {
 				mItemWeakReference.get().setCourierId(c);
 				return;
 			}
@@ -192,7 +198,7 @@ public class TrackingTask implements Runnable {
 		downloadFailed(TrackingItem.STATUS_ERROR_TRACKING_NUMBER);
 	}
 
-	private boolean connectCourier(int courier) throws NullPointerException {
+	private boolean connectCourier(int courier, boolean retry) throws NullPointerException {
 		String url = mTrackingURL;
 		long random_number = (long)(Math.random()*99999999999999999999.);
 		long timestamp = new Date().getTime();
@@ -204,6 +210,8 @@ public class TrackingTask implements Runnable {
 			url += "/r/HandlerTrack.ashx?callback=jQuery"+ random_number + "_" + timestamp +"&et=" + (courier);
 			url += "&num=" + mItemWeakReference.get().getTrackingNumber().toUpperCase(Locale.US) + "&_="+ (timestamp + 1);
 		}
+		if (mUnlock)
+			unLockServer(mItemWeakReference.get().getTrackingNumber().toUpperCase(Locale.US));
 
 		String content = "";
 		try {
@@ -219,7 +227,9 @@ public class TrackingTask implements Runnable {
 			
 			//mHttpclient.getParams().setParameter("http.useragent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)");
 			mHttpGet = new HttpGet(url);
-			//mHttpGet.setHeader("User-Agent", "MySuperUserAgent");
+//			mHttpGet.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:38.0) Gecko/20100101 Firefox/38.0");
+//			mHttpGet.setHeader("Host", "www.17track.net");
+//			mHttpGet.setHeader("Referer", "http://www.17track.net/en/result/post-details.shtml?nums=" + mItemWeakReference.get().getTrackingNumber().toUpperCase(Locale.US));
 			HttpResponse response = mHttpclient.execute(mHttpGet);
 			content = EntityUtils.toString(response.getEntity());
 			content = content.substring(content.indexOf('(') + 1, content.length() - 1);
@@ -268,6 +278,10 @@ public class TrackingTask implements Runnable {
 				downloadFailed(TrackingItem.STATUS_ERROR_TRACKING_NUMBER);
 				return false;
 			case -8:
+				if (retry){
+					unLockServer(mItemWeakReference.get().getTrackingNumber().toUpperCase(Locale.US));
+					return connectCourier(courier,false);
+				}
 				downloadFailed(TrackingItem.STATUS_ERROR_CAPTCHA);
 				return false;
 			case -9:
@@ -427,6 +441,32 @@ public class TrackingTask implements Runnable {
 
 		// done
 		return true;
+	}
+
+	private void unLockServer(String trackingNumber) {
+		try {
+			final HttpParams httpParams = new BasicHttpParams();
+
+			// 100 seconds timeout
+			HttpConnectionParams.setConnectionTimeout(httpParams, 100 * 1000);
+			HttpConnectionParams.setSoTimeout(httpParams, 100 * 1000);
+
+			HttpClient mHttpclient = new DefaultHttpClient(httpParams);
+			mHttpGet = new HttpGet(mUnlockURL + trackingNumber);
+			HttpResponse response = mHttpclient.execute(mHttpGet);
+		} catch (Exception e) {
+			e.printStackTrace();
+			mResponse = null;
+			if (e instanceof ConnectTimeoutException) {
+				downloadFailed(TrackingItem.STATUS_ERROR_CONNECTION_TIMEOUT);
+			} else if (e instanceof NoHttpResponseException) {
+				downloadFailed(TrackingItem.STATUS_ERROR_NO_HTTP_RESPONSE);
+			} else if (e instanceof IOException) {
+				downloadFailed(TrackingItem.STATUS_ERROR_INTERNET);
+			} else {
+				downloadFailed(TrackingItem.STATUS_ERROR_INTERNET);
+			}
+		}
 	}
 
 	public void abortConnection() {

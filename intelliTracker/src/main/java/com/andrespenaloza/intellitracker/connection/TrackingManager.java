@@ -57,11 +57,12 @@ public class TrackingManager {
 	// Sets the initial threadpool size to 8
 	private static final int CORE_POOL_SIZE = 4;
 	// Sets the maximum threadpool size to 8
-	private static final int MAXIMUM_POOL_SIZE = 4;
+	private static final int MAXIMUM_POOL_SIZE = 10;
 
 	private final BlockingQueue<Runnable> mUpdateWorkQueue;
 	private final ThreadPoolExecutor mUpdatePool;
 	private final Queue<TrackingTask> mConnectionTaskWorkQueue;
+	private static  int mTrackingRequests;
 
 	static class MyHandler extends Handler {
 		static TrackingManager sTrackingManager;
@@ -143,6 +144,7 @@ public class TrackingManager {
 		mConnectionTaskWorkQueue = new LinkedBlockingQueue<TrackingTask>();
 
 		mHandler = new MyHandler(Looper.getMainLooper(), this);
+		mTrackingRequests = 0;
 	}
 
 	public static void setContext(android.content.Context context) {
@@ -168,8 +170,13 @@ public class TrackingManager {
 			downloadTask = new TrackingTask();
 		}
 
+		boolean doUnlock = false;
+		if (mTrackingRequests++ % 15 == 0){
+			doUnlock = true;
+		}
+
 		// Initializes the task
-		downloadTask.initializeDownloaderTask(sInstance, item);
+		downloadTask.initializeDownloaderTask(sInstance, item,doUnlock);
 		sInstance.mUpdatePool.execute(downloadTask);
 
 		item.setStatus(TrackingItem.STATUS_UPDATING);

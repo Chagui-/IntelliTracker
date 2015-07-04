@@ -5,6 +5,7 @@ import android.text.TextUtils;
 
 import com.andrespenaloza.intellitracker.objects.Courier.Courier;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -275,6 +276,7 @@ public class TrackingItem {
 
     public void setName(String name) {
         mName = name;
+        ItemManager.getInstance(null).saveTrackingItem(this);
     }
 
     public String getTrackingNumber() {
@@ -521,27 +523,19 @@ public class TrackingItem {
         try {
             days_1 = (int) ((date.getTime() - mDateCreated.getTime()) / (1000 * 3600 * 24));
             days_2 = (int) ((date.getTime() - getFirstDateUpdated().getTime()) / (1000 * 3600 * 24));
-//            if (days <0){
-//                //get day from first update
-//                days =  (int) ((date.getTime() - getFirstDateUpdated().getTime()) / (1000 * 3600 * 24));
-//            }
         } catch (Exception ignored) { }
         return days_1 < days_2? days_2 : days_1;
     }
 
     @SuppressLint("SimpleDateFormat")
-    public int getDaysSince(String date) {
+    public int getDaysSince(String dateString) {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd' 'HH:mm");
-        int days = 0;
         try {
-            Date dateDate = format.parse(date);
-            days =  (int) ((dateDate.getTime() - mDateCreated.getTime()) / (1000 * 3600 * 24));
-            if (days <0){
-                //get day from first update
-                days =  (int) ((dateDate.getTime() - getFirstDateUpdated().getTime()) / (1000 * 3600 * 24));
-            }
-        } catch (Exception ignored) { }
-        return days;
+            return getDaysSince(format.parse(dateString));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return -1;
     }
 
     public int getPackageStatus() {
