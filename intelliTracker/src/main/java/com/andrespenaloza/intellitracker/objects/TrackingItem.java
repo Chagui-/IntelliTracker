@@ -492,7 +492,7 @@ public class TrackingItem {
             d = format.parse(dateString);
         }catch (Exception e){
             e.printStackTrace();
-            return new Date(0);
+            return null;
         }
         return d;
     }

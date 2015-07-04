@@ -109,10 +109,10 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 //            saveTrackingItem(i,database);
 //        }
 
-//        database.execSQL(DATABASE_CREATE_TRAKINGITEM);
-//        database.execSQL(DATABASE_CREATE_LABELCOLORS);
-//        database.execSQL(DATABASE_CREATE_LABEL);
-//        database.execSQL(DATABASE_CREATE_LABEL_TRACKINGITEM);
+        database.execSQL(DATABASE_CREATE_TRAKINGITEM);
+        database.execSQL(DATABASE_CREATE_LABELCOLORS);
+        database.execSQL(DATABASE_CREATE_LABEL);
+        database.execSQL(DATABASE_CREATE_LABEL_TRACKINGITEM);
     }
 
     public HashMap<Integer, TrackingItem> getAllTrackingItems(SQLiteDatabase database) {
